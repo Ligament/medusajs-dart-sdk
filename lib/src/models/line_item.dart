@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:medusajs_dart_sdk/src/models/product_variant.dart';
 import 'adjustment.dart';
 import 'tax.dart';
-import 'product.dart';
 
 part 'line_item.g.dart';
 
@@ -13,8 +11,13 @@ class LineItem {
   final String title;
   final int quantity;
   final int unitPrice;
+  final bool? requiresShipping;
+  final bool? isDiscountable;
+  final bool? isGiftcard;
+  final bool? isTaxInclusive;
+  final bool? isCustomPrice;
+  final int? compareAtUnitPrice;
   final int? originalUnitPrice;
-  final int? variantPrice;
   final int? subtotal;
   final int? discountTotal;
   final int? total;
@@ -22,26 +25,28 @@ class LineItem {
   final int? taxTotal;
   final int? rawDiscountTotal;
   final int? refundable;
-  final bool? isGiftCard;
-  final bool? shouldMerge;
-  final bool? allowDiscounts;
-  final bool? hasShipping;
-  final bool? isReturn;
-  final bool? isTaxInclusive;
   final String? cartId;
   final String? orderId;
   final String? swapId;
   final String? claimOrderId;
-  final String? titleOverride;
-  final String? description;
+  final String? subtitle;
   final String? thumbnail;
   final String? variantId;
   final String? productId;
+  final String? productTitle;
+  final String? productDescription;
+  final String? productSubtitle;
+  final String? productType;
+  final String? productTypeId;
+  final String? productCollection;
+  final String? productHandle;
+  final String? variantSku;
+  final String? variantBarcode;
+  final String? variantTitle;
+  final List<dynamic>? variantOptionValues;
   final Map<String, dynamic>? metadata;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Product? product;
-  final ProductVariant? variant;
   final List<Adjustment>? adjustments;
   final List<TaxLine>? taxLines;
 
@@ -50,8 +55,13 @@ class LineItem {
     required this.title,
     required this.quantity,
     required this.unitPrice,
+    this.requiresShipping,
+    this.isDiscountable,
+    this.isGiftcard,
+    this.isTaxInclusive,
+    this.isCustomPrice,
+    this.compareAtUnitPrice,
     this.originalUnitPrice,
-    this.variantPrice,
     this.subtotal,
     this.discountTotal,
     this.total,
@@ -59,28 +69,30 @@ class LineItem {
     this.taxTotal,
     this.rawDiscountTotal,
     this.refundable,
-    this.isGiftCard,
-    this.shouldMerge,
-    this.allowDiscounts,
-    this.hasShipping,
-    this.isReturn,
-    this.isTaxInclusive,
     this.cartId,
     this.orderId,
     this.swapId,
     this.claimOrderId,
-    this.titleOverride,
-    this.description,
+    this.subtitle,
     this.thumbnail,
     this.variantId,
     this.productId,
-    this.adjustments,
-    this.taxLines,
+    this.productTitle,
+    this.productDescription,
+    this.productSubtitle,
+    this.productType,
+    this.productTypeId,
+    this.productCollection,
+    this.productHandle,
+    this.variantSku,
+    this.variantBarcode,
+    this.variantTitle,
+    this.variantOptionValues,
     this.metadata,
     this.createdAt,
     this.updatedAt,
-    this.product,
-    this.variant,
+    this.adjustments,
+    this.taxLines,
   });
 
   factory LineItem.fromJson(Map<String, dynamic> json) =>

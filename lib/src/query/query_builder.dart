@@ -59,10 +59,10 @@ class QueryBuilder {
   /// Add date range filter
   QueryBuilder dateRange(String field, {DateTime? from, DateTime? to}) {
     if (from != null) {
-      _params['${field}[gte]'] = from.toIso8601String();
+      _params['$field[gte]'] = from.toIso8601String();
     }
     if (to != null) {
-      _params['${field}[lte]'] = to.toIso8601String();
+      _params['$field[lte]'] = to.toIso8601String();
     }
     return this;
   }
@@ -70,10 +70,10 @@ class QueryBuilder {
   /// Add numeric range filter
   QueryBuilder numberRange(String field, {num? min, num? max}) {
     if (min != null) {
-      _params['${field}[gte]'] = min;
+      _params['$field[gte]'] = min;
     }
     if (max != null) {
-      _params['${field}[lte]'] = max;
+      _params['$field[lte]'] = max;
     }
     return this;
   }

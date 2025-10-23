@@ -3,70 +3,73 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin customer management resource
+///
+/// Uses AdminCustomer model from @medusajs/types v2.10.1
+/// for enhanced admin-specific customer management capabilities.
 class AdminCustomerResource extends AdminResource {
   const AdminCustomerResource(super.client);
 
   String get resourcePath => '$basePath/customers';
 
   /// List customers
-  Future<PaginatedResponse<Customer>> list({
+  Future<PaginatedResponse<AdminCustomer>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Customer>(
+    return await listGeneric<AdminCustomer>(
       endpoint: resourcePath,
       dataKey: 'customers',
-      fromJson: Customer.fromJson,
+      fromJson: AdminCustomer.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a customer by ID
-  Future<Customer?> retrieve(
+  Future<AdminCustomer?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Customer>(
+    return await retrieveGeneric<AdminCustomer>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'customer',
-      fromJson: Customer.fromJson,
+      fromJson: AdminCustomer.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new customer
-  Future<Customer?> create(
+  Future<AdminCustomer?> create(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Customer>(
+    return await createGeneric<AdminCustomer>(
       body: body,
       endpoint: resourcePath,
       dataKey: 'customer',
-      fromJson: Customer.fromJson,
+      fromJson: AdminCustomer.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a customer
-  Future<Customer?> update(
+  Future<AdminCustomer?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Customer>(
+    return await updateGeneric<AdminCustomer>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'customer',
-      fromJson: Customer.fromJson,
+      fromJson: AdminCustomer.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +88,7 @@ class AdminCustomerResource extends AdminResource {
   }
 
   /// Search customers
-  Future<PaginatedResponse<Customer>> search(
+  Future<PaginatedResponse<AdminCustomer>> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -97,7 +100,7 @@ class AdminCustomerResource extends AdminResource {
   }
 
   /// Get customers by email
-  Future<PaginatedResponse<Customer>> byEmail(
+  Future<PaginatedResponse<AdminCustomer>> byEmail(
     String email, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -109,7 +112,7 @@ class AdminCustomerResource extends AdminResource {
   }
 
   /// Get customers by group
-  Future<PaginatedResponse<Customer>> byGroup(
+  Future<PaginatedResponse<AdminCustomer>> byGroup(
     String groupId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -121,7 +124,7 @@ class AdminCustomerResource extends AdminResource {
   }
 
   /// Add customer to group
-  Future<Customer?> addToGroup(
+  Future<AdminCustomer?> addToGroup(
     String customerId,
     String groupId, {
     ClientHeaders? headers,
@@ -134,12 +137,12 @@ class AdminCustomerResource extends AdminResource {
 
     final customerData = response['customer'];
     return customerData != null
-        ? Customer.fromJson(customerData as Map<String, dynamic>)
+        ? AdminCustomer.fromJson(customerData as Map<String, dynamic>)
         : null;
   }
 
   /// Remove customer from group
-  Future<Customer?> removeFromGroup(
+  Future<AdminCustomer?> removeFromGroup(
     String customerId,
     String groupId, {
     ClientHeaders? headers,
@@ -152,7 +155,7 @@ class AdminCustomerResource extends AdminResource {
 
     final customerData = response['customer'];
     return customerData != null
-        ? Customer.fromJson(customerData as Map<String, dynamic>)
+        ? AdminCustomer.fromJson(customerData as Map<String, dynamic>)
         : null;
   }
 }

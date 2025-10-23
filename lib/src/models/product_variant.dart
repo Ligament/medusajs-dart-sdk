@@ -111,7 +111,7 @@ class ProductVariant {
   /// Get variant dimensions as a formatted string
   String get formattedDimensions {
     if (!hasDimensions) return 'N/A';
-    return '${length}x${width}x${height}';
+    return '${length}x${width}x$height';
   }
 
   /// Get variant weight formatted

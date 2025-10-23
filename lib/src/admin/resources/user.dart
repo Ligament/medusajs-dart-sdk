@@ -3,70 +3,73 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin user management resource
+///
+/// Uses AdminUser model from @medusajs/types v2.10.1
+/// for enhanced admin-specific user management capabilities.
 class AdminUserResource extends AdminResource {
   const AdminUserResource(super.client);
 
   String get resourcePath => '$basePath/users';
 
   /// List users
-  Future<PaginatedResponse<User>> list({
+  Future<PaginatedResponse<AdminUser>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<User>(
+    return await listGeneric<AdminUser>(
       endpoint: resourcePath,
       dataKey: 'users',
-      fromJson: User.fromJson,
+      fromJson: AdminUser.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a user by ID
-  Future<User?> retrieve(
+  Future<AdminUser?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<User>(
+    return await retrieveGeneric<AdminUser>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'user',
-      fromJson: User.fromJson,
+      fromJson: AdminUser.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new user
-  Future<User?> create(
+  Future<AdminUser?> create(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<User>(
+    return await createGeneric<AdminUser>(
       body: body,
       endpoint: resourcePath,
       dataKey: 'user',
-      fromJson: User.fromJson,
+      fromJson: AdminUser.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a user
-  Future<User?> update(
+  Future<AdminUser?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<User>(
+    return await updateGeneric<AdminUser>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'user',
-      fromJson: User.fromJson,
+      fromJson: AdminUser.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +88,7 @@ class AdminUserResource extends AdminResource {
   }
 
   /// Get current user
-  Future<User?> me({
+  Future<AdminUser?> me({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
@@ -97,12 +100,12 @@ class AdminUserResource extends AdminResource {
 
     final userData = response['user'];
     return userData != null
-        ? User.fromJson(userData as Map<String, dynamic>)
+        ? AdminUser.fromJson(userData as Map<String, dynamic>)
         : null;
   }
 
   /// Update current user
-  Future<User?> updateMe(
+  Future<AdminUser?> updateMe(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -117,7 +120,7 @@ class AdminUserResource extends AdminResource {
 
     final userData = response['user'];
     return userData != null
-        ? User.fromJson(userData as Map<String, dynamic>)
+        ? AdminUser.fromJson(userData as Map<String, dynamic>)
         : null;
   }
 

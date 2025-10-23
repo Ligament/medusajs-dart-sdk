@@ -9,37 +9,37 @@ class StoreOrderResource extends StoreResource {
   String get resourcePath => '$basePath/orders';
 
   /// List orders for current customer
-  Future<PaginatedResponse<Order>> list({
+  Future<PaginatedResponse<StoreOrder>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Order>(
+    return await listGeneric<StoreOrder>(
       endpoint: resourcePath,
       dataKey: 'orders',
-      fromJson: Order.fromJson,
+      fromJson: StoreOrder.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve an order by ID
-  Future<Order?> retrieve(
+  Future<StoreOrder?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Order>(
+    return await retrieveGeneric<StoreOrder>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'order',
-      fromJson: Order.fromJson,
+      fromJson: StoreOrder.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve order by cart ID
-  Future<Order?> retrieveByCartId(
+  Future<StoreOrder?> retrieveByCartId(
     String cartId, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -52,33 +52,31 @@ class StoreOrderResource extends StoreResource {
 
     final orderData = response['order'];
     return orderData != null
-        ? Order.fromJson(orderData as Map<String, dynamic>)
+        ? StoreOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Request order transfer
-  Future<Order?> requestTransfer(
+  Future<StoreOrder?> requestTransfer(
     String id,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? query,
+    String email, {
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/transfer/request',
+      '$resourcePath/$id/transfer',
       method: 'POST',
-      body: body,
-      query: query,
+      body: {'email': email},
       headers: headers,
     );
 
     final orderData = response['order'];
     return orderData != null
-        ? Order.fromJson(orderData as Map<String, dynamic>)
+        ? StoreOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Cancel order transfer
-  Future<Order?> cancelTransfer(
+  Future<StoreOrder?> cancelTransfer(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -92,12 +90,12 @@ class StoreOrderResource extends StoreResource {
 
     final orderData = response['order'];
     return orderData != null
-        ? Order.fromJson(orderData as Map<String, dynamic>)
+        ? StoreOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Accept order transfer
-  Future<Order?> acceptTransfer(
+  Future<StoreOrder?> acceptTransfer(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
@@ -113,12 +111,12 @@ class StoreOrderResource extends StoreResource {
 
     final orderData = response['order'];
     return orderData != null
-        ? Order.fromJson(orderData as Map<String, dynamic>)
+        ? StoreOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Decline order transfer
-  Future<Order?> declineTransfer(
+  Future<StoreOrder?> declineTransfer(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
@@ -134,7 +132,7 @@ class StoreOrderResource extends StoreResource {
 
     final orderData = response['order'];
     return orderData != null
-        ? Order.fromJson(orderData as Map<String, dynamic>)
+        ? StoreOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 

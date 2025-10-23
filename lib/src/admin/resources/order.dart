@@ -3,61 +3,64 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin order management resource
+///
+/// Uses AdminOrder model from @medusajs/types v2.10.1
+/// for enhanced admin-specific order management capabilities.
 class AdminOrderResource extends AdminResource {
   const AdminOrderResource(super.client);
 
   String get resourcePath => '$basePath/orders';
 
   /// List orders
-  Future<PaginatedResponse<Order>> list({
+  Future<PaginatedResponse<AdminOrder>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Order>(
+    return await listGeneric<AdminOrder>(
       endpoint: resourcePath,
       dataKey: 'orders',
-      fromJson: Order.fromJson,
+      fromJson: AdminOrder.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve an order by ID
-  Future<Order?> retrieve(
+  Future<AdminOrder?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Order>(
+    return await retrieveGeneric<AdminOrder>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'order',
-      fromJson: Order.fromJson,
+      fromJson: AdminOrder.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update an order
-  Future<Order?> update(
+  Future<AdminOrder?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Order>(
+    return await updateGeneric<AdminOrder>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'order',
-      fromJson: Order.fromJson,
+      fromJson: AdminOrder.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Cancel an order
-  Future<Order?> cancel(
+  Future<AdminOrder?> cancel(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -70,13 +73,13 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Complete an order
-  Future<Order?> complete(
+  Future<AdminOrder?> complete(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -89,13 +92,13 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Archive an order
-  Future<Order?> archive(
+  Future<AdminOrder?> archive(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -108,13 +111,13 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Capture payment for an order
-  Future<Order?> capturePayment(
+  Future<AdminOrder?> capturePayment(
     String id, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? query,
@@ -129,13 +132,13 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Create fulfillment for an order
-  Future<Order?> createFulfillment(
+  Future<AdminOrder?> createFulfillment(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
@@ -150,13 +153,13 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 
   /// Create shipment for fulfillment
-  Future<Order?> createShipment(
+  Future<AdminOrder?> createShipment(
     String id,
     String fulfillmentId,
     Map<String, dynamic> body, {
@@ -172,8 +175,8 @@ class AdminOrderResource extends AdminResource {
     );
 
     final orderData = response['order'];
-    return orderData != null 
-        ? Order.fromJson(orderData as Map<String, dynamic>) 
+    return orderData != null
+        ? AdminOrder.fromJson(orderData as Map<String, dynamic>)
         : null;
   }
 }

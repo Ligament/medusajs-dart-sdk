@@ -20,69 +20,58 @@ class MedusaException implements Exception {
 
 /// Exception thrown when HTTP request fails
 class FetchError extends MedusaException {
-  FetchError(
-    String message, {
-    int? statusCode,
-    String? statusText,
-    Map<String, dynamic>? data,
-  }) : super(
-         message,
-         statusCode: statusCode,
-         statusText: statusText,
-         data: data,
-       );
+  FetchError(super.message, {super.statusCode, super.statusText, super.data});
 }
 
 /// Exception thrown when authentication fails
 class AuthenticationError extends MedusaException {
-  AuthenticationError(String message) : super(message);
+  AuthenticationError(super.message);
 }
 
 /// Exception thrown when authorization fails
 class AuthorizationError extends MedusaException {
-  AuthorizationError(String message) : super(message, statusCode: 403);
+  AuthorizationError(super.message) : super(statusCode: 403);
 }
 
 /// Exception thrown when resource is not found
 class NotFoundError extends MedusaException {
-  NotFoundError(String message) : super(message, statusCode: 404);
+  NotFoundError(super.message) : super(statusCode: 404);
 }
 
 /// Exception thrown when validation fails
 class ValidationError extends MedusaException {
   final List<ValidationErrorDetail>? errors;
 
-  ValidationError(String message, {this.errors, Map<String, dynamic>? data})
-    : super(message, statusCode: 400, data: data);
+  ValidationError(super.message, {this.errors, super.data})
+    : super(statusCode: 400);
 }
 
 /// Exception thrown when rate limit is exceeded
 class RateLimitError extends MedusaException {
   final int? retryAfter;
 
-  RateLimitError(String message, {this.retryAfter})
-    : super(message, statusCode: 429);
+  RateLimitError(super.message, {this.retryAfter}) : super(statusCode: 429);
 }
 
 /// Exception thrown when server error occurs
 class ServerError extends MedusaException {
-  ServerError(String message, {int? statusCode, Map<String, dynamic>? data})
-    : super(message, statusCode: statusCode ?? 500, data: data);
+  ServerError(super.message, {int? statusCode, super.data})
+    : super(statusCode: statusCode ?? 500);
 }
 
 /// Exception thrown when network error occurs
 class NetworkError extends MedusaException {
-  NetworkError(String message) : super(message);
+  NetworkError(super.message);
 }
 
 /// Exception thrown when timeout occurs
 class TimeoutError extends MedusaException {
-  TimeoutError(String message) : super(message);
+  TimeoutError(super.message);
 }
 
 /// Exception thrown when client configuration is invalid
 class ConfigurationError extends MedusaException {
-  ConfigurationError(String message) : super(message);
+  ConfigurationError(super.message);
 }
 
 /// Details for validation errors

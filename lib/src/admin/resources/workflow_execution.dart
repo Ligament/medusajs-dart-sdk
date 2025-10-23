@@ -1,78 +1,166 @@
+// =============================================================================
+// ADMIN WORKFLOW EXECUTION RESOURCE - Official @medusajs/types v2.10.1 (CANONICAL)
+// =============================================================================
+
 import '../../resources/base_resource.dart';
 import '../../models/models.dart';
 import '../../types/types.dart';
 
-/// Admin workflow execution management resource
+/// Admin workflow execution management resource for Medusa v2.10+
+///
+/// Provides comprehensive workflow execution tracking and management capabilities
+/// for Medusa's durable execution engine with transaction states, step management,
+/// and asynchronous execution support.
+///
+/// Features:
+/// - Workflow execution CRUD operations
+/// - Execution state tracking (pending, running, completed, failed, etc.)
+/// - Step-by-step execution monitoring
+/// - Transaction-based execution with rollback capabilities
+/// - Compensation and retry handling
+/// - Idempotent execution support
+/// - Background and async execution management
+///
+/// Example:
+/// ```dart
+/// // List workflow executions
+/// final executions = await medusa.admin.workflowExecution.list();
+///
+/// // Get execution by ID
+/// final execution = await medusa.admin.workflowExecution.retrieve('exec_01H...');
+///
+/// // Create new execution
+/// final newExecution = await medusa.admin.workflowExecution.create({
+///   'workflow_id': 'order-fulfillment',
+///   'input': {'order_id': 'order_01H...'},
+///   'idempotent': true,
+/// });
+///
+/// // Cancel execution
+/// await medusa.admin.workflowExecution.cancel('exec_01H...', {
+///   'reason': 'Customer requested cancellation',
+/// });
+/// ```
 class AdminWorkflowExecutionResource extends AdminResource {
   const AdminWorkflowExecutionResource(super.client);
 
+  /// API endpoint path for workflow executions
   String get resourcePath => '$basePath/workflow-executions';
 
-  /// List workflow executions
-  Future<PaginatedResponse<WorkflowExecution>> list({
+  /// List workflow executions with pagination and filtering
+  ///
+  /// [query] - Query parameters for filtering and pagination:
+  /// - `workflow_id`: Filter by workflow ID
+  /// - `transaction_id`: Filter by transaction ID
+  /// - `status`: Filter by execution status
+  /// - `idempotent`: Filter by idempotent flag
+  /// - `background`: Filter by background execution flag
+  /// - `limit`: Number of items to return (default: 20)
+  /// - `offset`: Number of items to skip (default: 0)
+  /// - `with_deleted`: Include deleted executions
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns paginated list of workflow executions
+  Future<PaginatedResponse<AdminWorkflowExecution>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<WorkflowExecution>(
+    return await listGeneric<AdminWorkflowExecution>(
       endpoint: resourcePath,
       dataKey: 'workflow_executions',
-      fromJson: WorkflowExecution.fromJson,
+      fromJson: AdminWorkflowExecution.fromJson,
       query: query,
       headers: headers,
     );
   }
 
-  /// Retrieve a workflow execution by ID
-  Future<WorkflowExecution?> retrieve(
+  /// Retrieve a specific workflow execution by ID
+  ///
+  /// [id] - The workflow execution ID
+  /// [query] - Optional query parameters:
+  /// - `expand`: Fields to expand in the response
+  /// - `fields`: Fields to include in the response
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns the workflow execution or null if not found
+  Future<AdminWorkflowExecution?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<WorkflowExecution>(
+    return await retrieveGeneric<AdminWorkflowExecution>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'workflow_execution',
-      fromJson: WorkflowExecution.fromJson,
+      fromJson: AdminWorkflowExecution.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new workflow execution
-  Future<WorkflowExecution?> create(
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? query,
+  ///
+  /// [data] - Workflow execution creation data:
+  /// - `workflow_id` (required): The workflow to execute
+  /// - `transaction_id`: Transaction ID for idempotency
+  /// - `input`: Input data for the workflow
+  /// - `metadata`: Additional metadata
+  /// - `priority`: Execution priority
+  /// - `timeout`: Execution timeout in milliseconds
+  /// - `idempotent`: Whether execution is idempotent
+  /// - `background`: Whether to run in background
+  /// - `async_execution`: Whether to execute asynchronously
+  /// - `tags`: Tags for filtering and organization
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns the created workflow execution
+  Future<AdminWorkflowExecution?> create(
+    Map<String, dynamic> data, {
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<WorkflowExecution>(
-      body: body,
+    return await createGeneric<AdminWorkflowExecution>(
       endpoint: resourcePath,
       dataKey: 'workflow_execution',
-      fromJson: WorkflowExecution.fromJson,
-      query: query,
+      fromJson: AdminWorkflowExecution.fromJson,
+      body: data,
       headers: headers,
     );
   }
 
   /// Update a workflow execution
-  Future<WorkflowExecution?> update(
+  ///
+  /// [id] - The workflow execution ID
+  /// [data] - Update data:
+  /// - `metadata`: Updated metadata
+  /// - `tags`: Updated tags
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns the updated workflow execution
+  Future<AdminWorkflowExecution?> update(
     String id,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? query,
+    Map<String, dynamic> data, {
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<WorkflowExecution>(
+    return await updateGeneric<AdminWorkflowExecution>(
       id: id,
-      body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'workflow_execution',
-      fromJson: WorkflowExecution.fromJson,
-      query: query,
+      fromJson: AdminWorkflowExecution.fromJson,
+      body: data,
       headers: headers,
     );
   }
 
   /// Delete a workflow execution
+  ///
+  /// [id] - The workflow execution ID
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns deletion confirmation
   Future<Map<String, dynamic>> delete(
     String id, {
     ClientHeaders? headers,
@@ -84,200 +172,206 @@ class AdminWorkflowExecutionResource extends AdminResource {
     );
   }
 
-  /// Execute a workflow
-  Future<WorkflowExecution?> execute(
-    String workflowId,
-    Map<String, dynamic> input, {
-    Map<String, dynamic>? options,
+  /// Cancel a running workflow execution
+  ///
+  /// [id] - The workflow execution ID
+  /// [data] - Cancellation data:
+  /// - `reason`: Cancellation reason
+  /// - `force`: Force cancellation even if running
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns the cancelled workflow execution
+  Future<AdminWorkflowExecution?> cancel(
+    String id,
+    Map<String, dynamic> data, {
     ClientHeaders? headers,
   }) async {
-    final body = {
-      'workflow_id': workflowId,
-      'input': input,
-      if (options != null) ...options,
-    };
-
     final response = await client.fetch<Map<String, dynamic>>(
-      '$basePath/workflows/run',
+      '$resourcePath/$id/cancel',
       method: 'POST',
-      body: body,
+      body: data,
       headers: headers,
     );
 
-    final data = response['workflow_execution'];
-    return data != null ? WorkflowExecution.fromJson(data as Map<String, dynamic>) : null;
+    final workflowData = response['workflow_execution'];
+    return workflowData != null
+        ? AdminWorkflowExecution.fromJson(workflowData as Map<String, dynamic>)
+        : null;
   }
 
-  /// Get workflow execution steps
-  Future<PaginatedResponse<Map<String, dynamic>>> getSteps(
+  /// Retry a failed workflow execution
+  ///
+  /// [id] - The workflow execution ID
+  /// [data] - Retry configuration:
+  /// - `reset_to_step`: Step to reset execution to
+  /// - `input`: Override input data
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns the retried workflow execution
+  Future<AdminWorkflowExecution?> retry(
+    String id,
+    Map<String, dynamic> data, {
+    ClientHeaders? headers,
+  }) async {
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/$id/retry',
+      method: 'POST',
+      body: data,
+      headers: headers,
+    );
+
+    final workflowData = response['workflow_execution'];
+    return workflowData != null
+        ? AdminWorkflowExecution.fromJson(workflowData as Map<String, dynamic>)
+        : null;
+  }
+
+  /// Get execution steps for a workflow execution
+  ///
+  /// [id] - The workflow execution ID
+  /// [query] - Optional query parameters:
+  /// - `limit`: Number of steps to return
+  /// - `offset`: Number of steps to skip
+  /// - `status`: Filter by step status
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns paginated list of execution steps
+  Future<PaginatedResponse<AdminWorkflowExecutionStep>> getSteps(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/steps',
+    return await listGeneric<AdminWorkflowExecutionStep>(
+      endpoint: '$resourcePath/$id/steps',
+      dataKey: 'steps',
+      fromJson: AdminWorkflowExecutionStep.fromJson,
       query: query,
       headers: headers,
     );
-
-    final items = (response['steps'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
-
-    return PaginatedResponse(
-      data: items,
-      count: response['count'] ?? 0,
-      offset: response['offset'] ?? 0,
-      limit: response['limit'] ?? 20,
-    );
   }
 
-  /// Get workflow execution by status
-  Future<PaginatedResponse<WorkflowExecution>> byStatus(
-    String status, {
-    Map<String, dynamic>? additionalFilters,
-    ClientHeaders? headers,
-  }) async {
-    final query = Map<String, dynamic>.from(additionalFilters ?? {});
-    query['status'] = status;
-
-    return list(query: query, headers: headers);
-  }
-
-  /// Get workflow executions by workflow ID
-  Future<PaginatedResponse<WorkflowExecution>> byWorkflow(
-    String workflowId, {
-    Map<String, dynamic>? additionalFilters,
-    ClientHeaders? headers,
-  }) async {
-    final query = Map<String, dynamic>.from(additionalFilters ?? {});
-    query['workflow_id'] = workflowId;
-
-    return list(query: query, headers: headers);
-  }
-
-  /// Cancel a workflow execution
-  Future<WorkflowExecution?> cancel(
-    String id, {
-    String? reason,
-    ClientHeaders? headers,
-  }) async {
-    final body = {
-      if (reason != null) 'reason': reason,
-    };
-
-    final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/cancel',
-      method: 'POST',
-      body: body,
-      headers: headers,
-    );
-
-    final data = response['workflow_execution'];
-    return data != null ? WorkflowExecution.fromJson(data as Map<String, dynamic>) : null;
-  }
-
-  /// Resume a paused workflow execution
-  Future<WorkflowExecution?> resume(
-    String id, {
-    Map<String, dynamic>? input,
-    ClientHeaders? headers,
-  }) async {
-    final body = {
-      if (input != null) 'input': input,
-    };
-
-    final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/resume',
-      method: 'POST',
-      body: body,
-      headers: headers,
-    );
-
-    final data = response['workflow_execution'];
-    return data != null ? WorkflowExecution.fromJson(data as Map<String, dynamic>) : null;
-  }
-
-  /// Retry a failed workflow execution
-  Future<WorkflowExecution?> retry(
-    String id, {
-    Map<String, dynamic>? input,
-    ClientHeaders? headers,
-  }) async {
-    final body = {
-      if (input != null) 'input': input,
-    };
-
-    final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/retry',
-      method: 'POST',
-      body: body,
-      headers: headers,
-    );
-
-    final data = response['workflow_execution'];
-    return data != null ? WorkflowExecution.fromJson(data as Map<String, dynamic>) : null;
-  }
-
-  /// Get workflow execution logs
-  Future<PaginatedResponse<Map<String, dynamic>>> getLogs(
+  /// Get execution logs for a workflow execution
+  ///
+  /// [id] - The workflow execution ID
+  /// [query] - Optional query parameters:
+  /// - `limit`: Number of log entries to return
+  /// - `offset`: Number of log entries to skip
+  /// - `level`: Filter by log level
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns execution logs
+  Future<Map<String, dynamic>> getLogs(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/logs',
+      method: 'GET',
       query: query,
       headers: headers,
     );
 
-    final items = (response['logs'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
-
-    return PaginatedResponse(
-      data: items,
-      count: response['count'] ?? 0,
-      offset: response['offset'] ?? 0,
-      limit: response['limit'] ?? 20,
-    );
+    return response;
   }
 
-  /// Subscribe to workflow execution events
-  Future<Map<String, dynamic>> subscribe(
-    String id, {
-    List<String>? events,
-    String? callbackUrl,
+  /// Get execution metrics for monitoring
+  ///
+  /// [query] - Optional query parameters:
+  /// - `workflow_id`: Filter by workflow ID
+  /// - `start_date`: Start date for metrics
+  /// - `end_date`: End date for metrics
+  /// - `granularity`: Metrics granularity (hour, day, week)
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns execution metrics and statistics
+  Future<Map<String, dynamic>> getMetrics({
+    Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    final body = {
-      if (events != null) 'events': events,
-      if (callbackUrl != null) 'callback_url': callbackUrl,
-    };
-
-    return await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/subscribe',
-      method: 'POST',
-      body: body,
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/metrics',
+      method: 'GET',
+      query: query,
       headers: headers,
     );
+
+    return response;
   }
 
-  /// Unsubscribe from workflow execution events
-  Future<Map<String, dynamic>> unsubscribe(
-    String id, {
-    String? subscriptionId,
+  /// Get execution statistics
+  ///
+  /// [query] - Optional query parameters:
+  /// - `workflow_id`: Filter by workflow ID
+  /// - `status`: Filter by execution status
+  /// - `period`: Time period for statistics
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns execution statistics
+  Future<Map<String, dynamic>> getStatistics({
+    Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    final body = {
-      if (subscriptionId != null) 'subscription_id': subscriptionId,
-    };
-
-    return await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/unsubscribe',
-      method: 'POST',
-      body: body,
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/statistics',
+      method: 'GET',
+      query: query,
       headers: headers,
     );
+
+    return response;
+  }
+
+  /// Bulk cancel multiple workflow executions
+  ///
+  /// [data] - Bulk cancellation data:
+  /// - `execution_ids`: List of execution IDs to cancel
+  /// - `reason`: Cancellation reason
+  /// - `force`: Force cancellation
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns bulk operation results
+  Future<Map<String, dynamic>> bulkCancel(
+    Map<String, dynamic> data, {
+    ClientHeaders? headers,
+  }) async {
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/bulk-cancel',
+      method: 'POST',
+      body: data,
+      headers: headers,
+    );
+
+    return response;
+  }
+
+  /// Bulk retry multiple failed workflow executions
+  ///
+  /// [data] - Bulk retry data:
+  /// - `execution_ids`: List of execution IDs to retry
+  /// - `reset_to_step`: Step to reset executions to
+  ///
+  /// [headers] - Optional headers for the request
+  ///
+  /// Returns bulk operation results
+  Future<Map<String, dynamic>> bulkRetry(
+    Map<String, dynamic> data, {
+    ClientHeaders? headers,
+  }) async {
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/bulk-retry',
+      method: 'POST',
+      body: data,
+      headers: headers,
+    );
+
+    return response;
   }
 }

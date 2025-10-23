@@ -9,7 +9,19 @@ class StoreFulfillmentResource extends StoreResource {
   String get resourcePath => '$basePath/shipping-options';
 
   /// List shipping options for a cart
-  Future<PaginatedResponse<Map<String, dynamic>>> listCartOptions({
+  ///
+  /// This method retrieves the list of shipping options for a cart. It sends a
+  /// request to the List Shipping Options API route.
+  ///
+  /// Related guide: Implement shipping step during checkout.
+  ///
+  /// Example:
+  /// ```dart
+  /// final options = await medusa.store.fulfillment.listCartOptions(
+  ///   cartId: 'cart_123',
+  /// );
+  /// ```
+  Future<StoreShippingOptionListResponse> listCartOptions({
     String? cartId,
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -25,20 +37,22 @@ class StoreFulfillmentResource extends StoreResource {
       headers: headers,
     );
 
-    final shippingOptions = (response['shipping_options'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
-
-    return PaginatedResponse(
-      data: shippingOptions,
-      count: response['count'] ?? 0,
-      offset: response['offset'] ?? 0,
-      limit: response['limit'] ?? 20,
-    );
+    return StoreShippingOptionListResponse.fromJson(response);
   }
 
   /// Calculate shipping option price for a cart
-  Future<Map<String, dynamic>?> calculate(
+  ///
+  /// This method calculates the price of a shipping option in a cart, which is useful
+  /// during checkout. It sends a request to the Calculate Shipping Option Price API route.
+  ///
+  /// Example:
+  /// ```dart
+  /// final option = await medusa.store.fulfillment.calculate(
+  ///   'so_123',
+  ///   cartId: 'cart_123',
+  /// );
+  /// ```
+  Future<StoreShippingOptionResponse?> calculate(
     String shippingOptionId, {
     String? cartId,
     Map<String, dynamic>? body,
@@ -58,11 +72,11 @@ class StoreFulfillmentResource extends StoreResource {
       headers: headers,
     );
 
-    return response['shipping_option'] as Map<String, dynamic>?;
+    return StoreShippingOptionResponse.fromJson(response);
   }
 
   /// List shipping options for a region
-  Future<PaginatedResponse<Map<String, dynamic>>> listForRegion(
+  Future<StoreShippingOptionListResponse> listForRegion(
     String regionId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -74,7 +88,7 @@ class StoreFulfillmentResource extends StoreResource {
   }
 
   /// Get shipping options by provider
-  Future<PaginatedResponse<Map<String, dynamic>>> byProvider(
+  Future<StoreShippingOptionListResponse> byProvider(
     String providerId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -86,7 +100,7 @@ class StoreFulfillmentResource extends StoreResource {
   }
 
   /// Get cheapest shipping option for cart
-  Future<Map<String, dynamic>?> getCheapest({
+  Future<StoreCartShippingOption?> getCheapest({
     String? cartId,
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -97,24 +111,25 @@ class StoreFulfillmentResource extends StoreResource {
       headers: headers,
     );
 
-    if (options.data.isEmpty) return null;
+    if (options.shippingOptions.isEmpty) return null;
 
     // Find option with lowest calculated price
-    Map<String, dynamic>? cheapest;
-    double? lowestPrice;
+    StoreCartShippingOption? cheapest;
+    int? lowestPrice;
 
-    for (final option in options.data) {
+    for (final option in options.shippingOptions) {
       final calculated = await calculate(
-        option['id'] as String,
+        option.id,
         cartId: cartId,
         headers: headers,
       );
 
       if (calculated != null) {
-        final price = calculated['calculated_price'] as num?;
+        final price =
+            calculated.shippingOption.calculatedPrice?.calculatedAmount;
         if (price != null && (lowestPrice == null || price < lowestPrice)) {
-          lowestPrice = price.toDouble();
-          cheapest = calculated;
+          lowestPrice = price;
+          cheapest = calculated.shippingOption;
         }
       }
     }
@@ -123,7 +138,7 @@ class StoreFulfillmentResource extends StoreResource {
   }
 
   /// Get fastest shipping option for cart
-  Future<Map<String, dynamic>?> getFastest({
+  Future<StoreCartShippingOption?> getFastest({
     String? cartId,
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -138,6 +153,8 @@ class StoreFulfillmentResource extends StoreResource {
       headers: headers,
     );
 
-    return options.data.isNotEmpty ? options.data.first : null;
+    return options.shippingOptions.isNotEmpty
+        ? options.shippingOptions.first
+        : null;
   }
 }

@@ -9,64 +9,64 @@ class AdminStockLocationResource extends AdminResource {
   String get resourcePath => '$basePath/stock-locations';
 
   /// List stock locations
-  Future<PaginatedResponse<StockLocation>> list({
+  Future<PaginatedResponse<AdminStockLocation>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<StockLocation>(
+    return await listGeneric<AdminStockLocation>(
       endpoint: resourcePath,
       dataKey: 'stock_locations',
-      fromJson: StockLocation.fromJson,
+      fromJson: AdminStockLocation.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a stock location by ID
-  Future<StockLocation?> retrieve(
+  Future<AdminStockLocation?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<StockLocation>(
+    return await retrieveGeneric<AdminStockLocation>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'stock_location',
-      fromJson: StockLocation.fromJson,
+      fromJson: AdminStockLocation.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new stock location
-  Future<StockLocation?> create(
-    Map<String, dynamic> body, {
+  Future<AdminStockLocation?> create(
+    AdminCreateStockLocation body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<StockLocation>(
-      body: body,
+    return await createGeneric<AdminStockLocation>(
+      body: body.toJson(),
       endpoint: resourcePath,
       dataKey: 'stock_location',
-      fromJson: StockLocation.fromJson,
+      fromJson: AdminStockLocation.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a stock location
-  Future<StockLocation?> update(
+  Future<AdminStockLocation?> update(
     String id,
-    Map<String, dynamic> body, {
+    AdminUpdateStockLocation body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<StockLocation>(
+    return await updateGeneric<AdminStockLocation>(
       id: id,
-      body: body,
+      body: body.toJson(),
       endpoint: '$resourcePath/$id',
       dataKey: 'stock_location',
-      fromJson: StockLocation.fromJson,
+      fromJson: AdminStockLocation.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +85,7 @@ class AdminStockLocationResource extends AdminResource {
   }
 
   /// Get inventory levels for a stock location
-  Future<PaginatedResponse<Map<String, dynamic>>> getInventoryLevels(
+  Future<PaginatedResponse<AdminInventoryLevel>> getInventoryLevels(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -96,9 +96,13 @@ class AdminStockLocationResource extends AdminResource {
       headers: headers,
     );
 
-    final items = (response['inventory_levels'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
+    final items =
+        (response['inventory_levels'] as List? ?? [])
+            .map(
+              (json) =>
+                  AdminInventoryLevel.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
 
     return PaginatedResponse(
       data: items,
@@ -109,20 +113,23 @@ class AdminStockLocationResource extends AdminResource {
   }
 
   /// Update inventory level for a stock location
-  Future<Map<String, dynamic>?> updateInventoryLevel(
+  Future<AdminInventoryLevel?> updateInventoryLevel(
     String id,
     String inventoryItemId,
-    Map<String, dynamic> body, {
+    AdminUpdateInventoryLevel body, {
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/inventory-levels/$inventoryItemId',
       method: 'POST',
-      body: body,
+      body: body.toJson(),
       headers: headers,
     );
 
-    return response['inventory_level'] as Map<String, dynamic>?;
+    final inventoryLevel = response['inventory_level'];
+    return inventoryLevel != null
+        ? AdminInventoryLevel.fromJson(inventoryLevel as Map<String, dynamic>)
+        : null;
   }
 
   /// Get fulfillment sets for a stock location
@@ -137,9 +144,10 @@ class AdminStockLocationResource extends AdminResource {
       headers: headers,
     );
 
-    final items = (response['fulfillment_sets'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
+    final items =
+        (response['fulfillment_sets'] as List? ?? [])
+            .map((json) => json as Map<String, dynamic>)
+            .toList();
 
     return PaginatedResponse(
       data: items,
@@ -155,10 +163,13 @@ class AdminStockLocationResource extends AdminResource {
     String fulfillmentSetId, {
     ClientHeaders? headers,
   }) async {
+    final request = AdminAddFulfillmentSetRequest(
+      fulfillmentSetId: fulfillmentSetId,
+    );
     return await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/fulfillment-sets',
       method: 'POST',
-      body: {'fulfillment_set_id': fulfillmentSetId},
+      body: request.toJson(),
       headers: headers,
     );
   }

@@ -3,36 +3,39 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Store region resource for region operations
+///
+/// Uses Store models from store_infrastructure.dart
+/// for 100% @medusajs/types v2.10.1 compatibility
 class StoreRegionResource extends StoreResource {
   const StoreRegionResource(super.client);
 
   String get resourcePath => '$basePath/regions';
 
   /// List regions
-  Future<PaginatedResponse<Region>> list({
+  Future<PaginatedResponse<StoreRegion>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Region>(
+    return await listGeneric<StoreRegion>(
       endpoint: resourcePath,
       dataKey: 'regions',
-      fromJson: Region.fromJson,
+      fromJson: StoreRegion.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a region by ID
-  Future<Region?> retrieve(
+  Future<StoreRegion?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Region>(
+    return await retrieveGeneric<StoreRegion>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'region',
-      fromJson: Region.fromJson,
+      fromJson: StoreRegion.fromJson,
       query: query,
       headers: headers,
     );

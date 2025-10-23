@@ -3,43 +3,46 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Store category resource for browsing product categories
+///
+/// Provides customer-facing category functionality for browsing
+/// and discovering product categories.
 class StoreCategoryResource extends StoreResource {
   const StoreCategoryResource(super.client);
 
   String get resourcePath => '$basePath/product-categories';
 
   /// List categories
-  Future<PaginatedResponse<Category>> list({
+  Future<PaginatedResponse<StoreProductCategory>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Category>(
+    return await listGeneric<StoreProductCategory>(
       endpoint: resourcePath,
       dataKey: 'product_categories',
-      fromJson: Category.fromJson,
+      fromJson: StoreProductCategory.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a category by ID
-  Future<Category?> retrieve(
+  Future<StoreProductCategory?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Category>(
+    return await retrieveGeneric<StoreProductCategory>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'product_category',
-      fromJson: Category.fromJson,
+      fromJson: StoreProductCategory.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Get products in category
-  Future<PaginatedResponse<Product>> getProducts(
+  Future<PaginatedResponse<StoreProduct>> getProducts(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -50,9 +53,10 @@ class StoreCategoryResource extends StoreResource {
       headers: headers,
     );
 
-    final products = (response['products'] as List? ?? [])
-        .map((json) => Product.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final products =
+        (response['products'] as List? ?? [])
+            .map((json) => StoreProduct.fromJson(json as Map<String, dynamic>))
+            .toList();
 
     return PaginatedResponse(
       data: products,
@@ -63,7 +67,7 @@ class StoreCategoryResource extends StoreResource {
   }
 
   /// Get child categories
-  Future<PaginatedResponse<Category>> getChildren(
+  Future<PaginatedResponse<StoreProductCategory>> getChildren(
     String parentId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -75,7 +79,7 @@ class StoreCategoryResource extends StoreResource {
   }
 
   /// Get root categories (no parent)
-  Future<PaginatedResponse<Category>> getRoots({
+  Future<PaginatedResponse<StoreProductCategory>> getRoots({
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {
@@ -86,7 +90,7 @@ class StoreCategoryResource extends StoreResource {
   }
 
   /// Search categories
-  Future<PaginatedResponse<Category>> search(
+  Future<PaginatedResponse<StoreProductCategory>> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,

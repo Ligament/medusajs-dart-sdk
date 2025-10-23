@@ -87,7 +87,8 @@ class Country {
   @JsonKey(name: 'iso_3')
   final String iso3;
 
-  /// Numeric country code (as string in the API)
+  /// Numeric country code (can be int or string in the API)
+  @JsonKey(name: 'num_code', fromJson: _numCodeFromJson, toJson: _numCodeToJson)
   final String numCode;
 
   /// Country name
@@ -200,3 +201,19 @@ class FulfillmentProvider {
   String toString() =>
       'FulfillmentProvider(id: $id, isInstalled: $isInstalled)';
 }
+
+/// Helper function to convert num_code from int or string to string
+String _numCodeFromJson(dynamic value) {
+  if (value is int) {
+    return value.toString();
+  } else if (value is String) {
+    return value;
+  } else {
+    throw FormatException(
+      'Expected int or String for num_code, got ${value.runtimeType}',
+    );
+  }
+}
+
+/// Helper function to convert num_code from string to dynamic for JSON
+dynamic _numCodeToJson(String value) => value;

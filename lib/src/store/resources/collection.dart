@@ -3,43 +3,46 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Store collection resource for browsing collections
+///
+/// Provides customer-facing collection functionality for browsing
+/// and discovering product collections.
 class StoreCollectionResource extends StoreResource {
   const StoreCollectionResource(super.client);
 
   String get resourcePath => '$basePath/collections';
 
   /// List collections
-  Future<PaginatedResponse<Collection>> list({
+  Future<PaginatedResponse<StoreCollection>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Collection>(
+    return await listGeneric<StoreCollection>(
       endpoint: resourcePath,
       dataKey: 'collections',
-      fromJson: Collection.fromJson,
+      fromJson: StoreCollection.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a collection by ID
-  Future<Collection?> retrieve(
+  Future<StoreCollection?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Collection>(
+    return await retrieveGeneric<StoreCollection>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'collection',
-      fromJson: Collection.fromJson,
+      fromJson: StoreCollection.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Get products in collection
-  Future<PaginatedResponse<Product>> getProducts(
+  Future<PaginatedResponse<StoreProduct>> getProducts(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -50,9 +53,10 @@ class StoreCollectionResource extends StoreResource {
       headers: headers,
     );
 
-    final products = (response['products'] as List? ?? [])
-        .map((json) => Product.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final products =
+        (response['products'] as List? ?? [])
+            .map((json) => StoreProduct.fromJson(json as Map<String, dynamic>))
+            .toList();
 
     return PaginatedResponse(
       data: products,
@@ -63,7 +67,7 @@ class StoreCollectionResource extends StoreResource {
   }
 
   /// Search collections
-  Future<PaginatedResponse<Collection>> search(
+  Future<PaginatedResponse<StoreCollection>> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,

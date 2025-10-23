@@ -229,8 +229,8 @@ enum PaymentSessionStatus {
 
 /// Shipping option price type enumeration
 enum ShippingOptionPriceType {
-  @JsonValue('flat_rate')
-  flatRate,
+  @JsonValue('flat')
+  flat,
   @JsonValue('calculated')
   calculated,
 }

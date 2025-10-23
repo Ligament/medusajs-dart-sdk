@@ -20,3 +20,6 @@ export 'src/realtime/realtime.dart';
 export 'src/resources/base_resource.dart';
 export 'src/admin/resources/resources.dart';
 export 'src/store/resources/resources.dart';
+
+// Test utilities (for development and testing)
+export 'src/test_utils/test_environment.dart';

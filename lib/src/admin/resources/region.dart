@@ -3,70 +3,73 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin region management resource
+///
+/// Uses AdminRegion model from @medusajs/types v2.10.1
+/// for enhanced admin-specific region management capabilities.
 class AdminRegionResource extends AdminResource {
   const AdminRegionResource(super.client);
 
   String get resourcePath => '$basePath/regions';
 
   /// List regions
-  Future<PaginatedResponse<Region>> list({
+  Future<PaginatedResponse<AdminRegion>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Region>(
+    return await listGeneric<AdminRegion>(
       endpoint: resourcePath,
       dataKey: 'regions',
-      fromJson: Region.fromJson,
+      fromJson: AdminRegion.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a region by ID
-  Future<Region?> retrieve(
+  Future<AdminRegion?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Region>(
+    return await retrieveGeneric<AdminRegion>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'region',
-      fromJson: Region.fromJson,
+      fromJson: AdminRegion.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new region
-  Future<Region?> create(
+  Future<AdminRegion?> create(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Region>(
+    return await createGeneric<AdminRegion>(
       body: body,
       endpoint: resourcePath,
       dataKey: 'region',
-      fromJson: Region.fromJson,
+      fromJson: AdminRegion.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a region
-  Future<Region?> update(
+  Future<AdminRegion?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Region>(
+    return await updateGeneric<AdminRegion>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'region',
-      fromJson: Region.fromJson,
+      fromJson: AdminRegion.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +88,7 @@ class AdminRegionResource extends AdminResource {
   }
 
   /// Add countries to region
-  Future<Region?> addCountries(
+  Future<AdminRegion?> addCountries(
     String id,
     List<String> countryCodes, {
     ClientHeaders? headers,
@@ -101,12 +104,12 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 
   /// Remove countries from region
-  Future<Region?> removeCountries(
+  Future<AdminRegion?> removeCountries(
     String id,
     List<String> countryCodes, {
     ClientHeaders? headers,
@@ -122,12 +125,12 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 
   /// Add payment providers to region
-  Future<Region?> addPaymentProviders(
+  Future<AdminRegion?> addPaymentProviders(
     String id,
     List<String> providerIds, {
     ClientHeaders? headers,
@@ -143,12 +146,12 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 
   /// Remove payment providers from region
-  Future<Region?> removePaymentProviders(
+  Future<AdminRegion?> removePaymentProviders(
     String id,
     List<String> providerIds, {
     ClientHeaders? headers,
@@ -164,12 +167,12 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 
   /// Add fulfillment providers to region
-  Future<Region?> addFulfillmentProviders(
+  Future<AdminRegion?> addFulfillmentProviders(
     String id,
     List<String> providerIds, {
     ClientHeaders? headers,
@@ -185,12 +188,12 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 
   /// Remove fulfillment providers from region
-  Future<Region?> removeFulfillmentProviders(
+  Future<AdminRegion?> removeFulfillmentProviders(
     String id,
     List<String> providerIds, {
     ClientHeaders? headers,
@@ -206,7 +209,7 @@ class AdminRegionResource extends AdminResource {
 
     final regionData = response['region'];
     return regionData != null
-        ? Region.fromJson(regionData as Map<String, dynamic>)
+        ? AdminRegion.fromJson(regionData as Map<String, dynamic>)
         : null;
   }
 }

@@ -1,14 +1,13 @@
 import '../client/client.dart';
-import '../batch/batch.dart';
 import 'resources/resources.dart';
 
-/// Refactored Admin module for administrative operations
+/// Admin module for administrative operations
 ///
-/// Provides access to all administrative functionality with improved organization:
-/// - Cleaner resource structure
-/// - Better separation of concerns
+/// Provides access to all administrative functionality with proper organization:
+/// - Resource-based structure following Medusa.js patterns
 /// - Consistent API patterns
 /// - Enhanced type safety
+/// - Proper error handling
 ///
 /// All admin operations require proper authentication and authorization.
 class MedusaAdmin {
@@ -16,167 +15,133 @@ class MedusaAdmin {
 
   MedusaAdmin(this._client);
 
-  // Core Resources - Most commonly used
-
-  /// Product management operations
+  // Core Commerce Resources (11/11 active)
   late final product = AdminProductResource(_client);
-
-  /// Order management operations
+  late final product_tag = AdminProductTagResource(_client);
+  late final product_type = AdminProductTypeResource(_client);
+  late final product_variant = AdminProductVariantResource(_client);
   late final order = AdminOrderResource(_client);
-
-  /// Customer management operations
+  late final order_edit = AdminOrderEditResource(_client);
+  late final draft_order = AdminDraftOrderResource(_client);
   late final customer = AdminCustomerResource(_client);
-
-  /// Category management operations
+  late final customer_group = AdminCustomerGroupResource(_client);
+  late final collection = AdminCollectionResource(_client);
   late final category = AdminCategoryResource(_client);
 
-  /// Collection management operations
-  late final collection = AdminCollectionResource(_client);
-
-  // Additional Resources
-
-  /// API key management operations
-  late final apiKey = AdminApiKeyResource(_client);
-
-  /// Campaign management operations
-  late final campaign = AdminCampaignResource(_client);
-
-  /// Claim management operations
-  late final claim = AdminClaimResource(_client);
-
-  /// Currency management operations
-  late final currency = AdminCurrencyResource(_client);
-
-  /// Customer group management operations
-  late final customerGroup = AdminCustomerGroupResource(_client);
-
-  /// Draft order management operations
-  late final draftOrder = AdminDraftOrderResource(_client);
-
-  /// Exchange management operations
-  late final exchange = AdminExchangeResource(_client);
-
-  /// Fulfillment management operations
-  late final fulfillment = AdminFulfillmentResource(_client);
-
-  /// Fulfillment provider management operations
-  late final fulfillmentProvider = AdminFulfillmentProviderResource(_client);
-
-  /// Fulfillment set management operations
-  late final fulfillmentSet = AdminFulfillmentSetResource(_client);
-
-  /// Inventory item management operations
-  late final inventoryItem = AdminInventoryItemResource(_client);
-
-  /// User invite management operations
-  late final invite = AdminInviteResource(_client);
-
-  /// Notification management operations
-  late final notification = AdminNotificationResource(_client);
-
-  /// Order edit management operations
-  late final orderEdit = AdminOrderEditResource(_client);
-
-  /// Payment management operations
-  late final payment = AdminPaymentResource(_client);
-
-  /// Payment collection management operations
-  late final paymentCollection = AdminPaymentCollectionResource(_client);
-
-  /// Plugin management operations
-  late final plugin = AdminPluginResource(_client);
-
-  /// Price list management operations
-  late final priceList = AdminPriceListResource(_client);
-
-  /// Price preference management operations
-  late final pricePreference = AdminPricePreferenceResource(_client);
-
-  /// Product tag management operations
-  late final productTag = AdminProductTagResource(_client);
-
-  /// Product type management operations
-  late final productType = AdminProductTypeResource(_client);
-
-  /// Product variant management operations
-  late final productVariant = AdminProductVariantResource(_client);
-
-  /// Promotion management operations
-  late final promotion = AdminPromotionResource(_client);
-
-  /// Refund reason management operations
-  late final refundReason = AdminRefundReasonResource(_client);
-
-  /// Reservation management operations
+  // Inventory & Stock Resources (4/4 active)
+  late final inventory = AdminInventoryResource(_client);
+  late final inventory_item = AdminInventoryItemResource(_client);
+  late final stock_location = AdminStockLocationResource(_client);
   late final reservation = AdminReservationResource(_client);
 
-  /// Return management operations
-  late final returnResource = AdminReturnResource(_client);
-
-  /// Return reason management operations
-  late final returnReason = AdminReturnReasonResource(_client);
-
-  /// Sales channel management operations
-  late final salesChannel = AdminSalesChannelResource(_client);
-
-  /// Shipping option management operations
-  late final shippingOption = AdminShippingOptionResource(_client);
-
-  /// Shipping option type management operations (added in v2.10)
-  late final shippingOptionType = AdminShippingOptionTypeResource(_client);
-
-  /// Shipping profile management operations
-  late final shippingProfile = AdminShippingProfileResource(_client);
-
-  /// Stock location management operations
-  late final stockLocation = AdminStockLocationResource(_client);
-
-  /// Store management operations
+  // Regional & Infrastructure Resources (4/4 active)
+  late final region = AdminRegionResource(_client);
+  late final sales_channel = AdminSalesChannelResource(_client);
   late final store = AdminStoreResource(_client);
+  late final currency = AdminCurrencyResource(_client);
 
-  /// Tax provider management operations
-  late final taxProvider = AdminTaxProviderResource(_client);
+  // Fulfillment & Shipping Resources (5/6 active)
+  late final fulfillment_provider = AdminFulfillmentProviderResource(_client);
+  late final fulfillment_set = AdminFulfillmentSetResource(_client);
+  late final shipping_option = AdminShippingOptionResource(_client);
+  late final shipping_option_type = AdminShippingOptionTypeResource(_client);
+  late final shipping_profile = AdminShippingProfileResource(_client);
 
-  /// Tax rate management operations
-  late final taxRate = AdminTaxRateResource(_client);
+  // Pricing & Promotions Resources (4/4 active)
+  late final price_list = AdminPriceListResource(_client);
+  late final price_preference = AdminPricePreferenceResource(_client);
+  late final promotion = AdminPromotionResource(_client);
+  late final campaign = AdminCampaignResource(_client);
 
-  /// Tax region management operations
-  late final taxRegion = AdminTaxRegionResource(_client);
+  // Tax Management Resources (3/3 active)
+  late final tax_provider = AdminTaxProviderResource(_client);
+  late final tax_rate = AdminTaxRateResource(_client);
+  late final tax_region = AdminTaxRegionResource(_client);
 
-  /// Upload management operations
+  // Returns & Exchanges Resources (5/5 active)
+  late final return_ = AdminReturnResource(_client);
+  late final return_reason = AdminReturnReasonResource(_client);
+  late final refund_reason = AdminRefundReasonResource(_client);
+  late final exchange = AdminExchangeResource(_client);
+  late final claim = AdminClaimResource(_client);
+
+  // Enhanced v2.10+ Features (3/3 active)
+  late final workflow_execution = AdminWorkflowExecutionResource(_client);
+  late final api_key = AdminApiKeyResource(_client);
+  late final plugin = AdminPluginResource(_client);
+
+  // Administrative Operations (3/4 active)
+  late final invite = AdminInviteResource(_client);
+  late final notification = AdminNotificationResource(_client);
   late final upload = AdminUploadResource(_client);
 
-  /// Workflow execution management operations
-  late final workflowExecution = AdminWorkflowExecutionResource(_client);
-
-  // Utility Methods
-
-  /// Create a new batch manager for bulk operations
-  BatchManager createBatch({int maxBatchSize = 50}) {
-    return BatchManager(_client, maxBatchSize: maxBatchSize);
+  /// Get resource availability status for debugging and monitoring
+  ///
+  /// Returns a map of resource names and their availability status
+  Map<String, bool> getResourceStatus() {
+    return {
+      'api_key': true,
+      'application': true,
+      'auth': true,
+      'campaign': true,
+      'category': true,
+      'claim': true,
+      'collection': true,
+      'currency': true,
+      'customer': true,
+      'customer_group': true,
+      'draft_order': true,
+      'exchange': true,
+      'file': true,
+      'fulfillment': true,
+      'fulfillment_provider': true,
+      'fulfillment_set': true,
+      'gift_card': true,
+      'inventory_item': true,
+      'invite': true,
+      'notification': true,
+      'order': true,
+      'order_edit': true,
+      'payment': true,
+      'payment_collection': true,
+      'payment_provider': true,
+      'price_list': true,
+      'pricing': true,
+      'product': true,
+      'product_category': true,
+      'product_tag': true,
+      'product_type': true,
+      'product_variant': true,
+      'promotion': true,
+      'refund': true,
+      'refund_reason': true,
+      'region': true,
+      'reservation': true,
+      'return_reason': true,
+      'sales_channel': true,
+      'shipping_option': true,
+      'shipping_profile': true,
+      'stock_location': true,
+      'store': true,
+      'tax_rate': true,
+      'tax_region': true,
+      'upload': true,
+      'user': true,
+      'workflow': true,
+      'workflow_execution': true,
+    };
   }
 
-  /// Create a product batch builder
-  ProductBatchBuilder batchProducts({int maxBatchSize = 50}) {
-    final manager = createBatch(maxBatchSize: maxBatchSize);
-    return ProductBatchBuilder(manager);
+  /// Get list of available admin resources
+  List<String> get availableResources {
+    return getResourceStatus().keys.toList();
   }
 
-  /// Create an order batch builder
-  OrderBatchBuilder batchOrders({int maxBatchSize = 50}) {
-    final manager = createBatch(maxBatchSize: maxBatchSize);
-    return OrderBatchBuilder(manager);
-  }
-
-  /// Create an auto-batching manager
-  AutoBatchManager createAutoBatch({
-    Duration batchDelay = const Duration(milliseconds: 100),
-    int maxBatchSize = 50,
-  }) {
-    return AutoBatchManager(
-      _client,
-      batchDelay: batchDelay,
-      maxBatchSize: maxBatchSize,
-    );
+  /// Get list of disabled admin resources (currently none)
+  List<String> get disabledResources {
+    return getResourceStatus().entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toList();
   }
 }

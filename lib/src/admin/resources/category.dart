@@ -3,89 +3,94 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin product category management resource
+///
+/// Manages hierarchical product categories for organizing products
+/// with support for parent-child relationships, visibility controls, and ranking.
 class AdminCategoryResource extends AdminResource {
   const AdminCategoryResource(super.client);
 
   String get resourcePath => '$basePath/product-categories';
 
   /// List categories
-  Future<PaginatedResponse<Category>> list({
+  Future<AdminProductCategoryListResponse> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Category>(
-      endpoint: resourcePath,
-      dataKey: 'product_categories',
-      fromJson: Category.fromJson,
+    final response = await client.fetch<Map<String, dynamic>>(
+      resourcePath,
       query: query,
       headers: headers,
     );
+
+    return AdminProductCategoryListResponse.fromJson(response);
   }
 
   /// Retrieve a category by ID
-  Future<Category?> retrieve(
+  Future<AdminProductCategory?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Category>(
+    return await retrieveGeneric<AdminProductCategory>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'product_category',
-      fromJson: Category.fromJson,
+      fromJson: AdminProductCategory.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new category
-  Future<Category?> create(
-    Map<String, dynamic> body, {
+  Future<AdminProductCategory?> create(
+    AdminCreateProductCategory createData, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Category>(
-      body: body,
+    return await createGeneric<AdminProductCategory>(
+      body: createData.toJson(),
       endpoint: resourcePath,
       dataKey: 'product_category',
-      fromJson: Category.fromJson,
+      fromJson: AdminProductCategory.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a category
-  Future<Category?> update(
+  Future<AdminProductCategory?> update(
     String id,
-    Map<String, dynamic> body, {
+    AdminUpdateProductCategory updateData, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Category>(
+    return await updateGeneric<AdminProductCategory>(
       id: id,
-      body: body,
+      body: updateData.toJson(),
       endpoint: '$resourcePath/$id',
       dataKey: 'product_category',
-      fromJson: Category.fromJson,
+      fromJson: AdminProductCategory.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Delete a category
-  Future<Map<String, dynamic>> delete(
+  Future<AdminProductCategoryDeleteResponse> delete(
     String id, {
     ClientHeaders? headers,
   }) async {
-    return await deleteGeneric(
-      id: id,
-      endpoint: '$resourcePath/$id',
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/$id',
+      method: 'DELETE',
       headers: headers,
     );
+
+    return AdminProductCategoryDeleteResponse.fromJson(response);
   }
 
   /// Search categories
-  Future<PaginatedResponse<Category>> search(
+  Future<AdminCategorySearchResponse> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -93,11 +98,19 @@ class AdminCategoryResource extends AdminResource {
     final query = Map<String, dynamic>.from(additionalFilters ?? {});
     query['q'] = searchTerm;
 
-    return list(query: query, headers: headers);
+    final startTime = DateTime.now();
+    final listResponse = await list(query: query, headers: headers);
+    final executionTime = DateTime.now().difference(startTime).inMilliseconds;
+
+    return AdminCategorySearchResponse(
+      categories: listResponse.productCategories,
+      totalCount: listResponse.count,
+      executionTime: executionTime,
+    );
   }
 
   /// Get child categories
-  Future<PaginatedResponse<Category>> getChildren(
+  Future<AdminProductCategoryListResponse> getChildren(
     String parentId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -109,7 +122,7 @@ class AdminCategoryResource extends AdminResource {
   }
 
   /// Get root categories (no parent)
-  Future<PaginatedResponse<Category>> getRoots({
+  Future<AdminProductCategoryListResponse> getRoots({
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {
@@ -120,49 +133,77 @@ class AdminCategoryResource extends AdminResource {
   }
 
   /// Add products to category
-  Future<Category?> addProducts(
+  Future<AdminCategoryProductBatchResponse?> addProducts(
     String id,
     List<String> productIds, {
     ClientHeaders? headers,
   }) async {
-    final body = {'product_ids': productIds};
+    final batch = AdminCategoryProductBatch(productIds: productIds);
 
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/products/batch',
       method: 'POST',
-      body: body,
+      body: batch.toJson(),
       headers: headers,
     );
 
+    // If response contains batch information, return batch response
+    if (response.containsKey('processed') || response.containsKey('failed')) {
+      return AdminCategoryProductBatchResponse.fromJson(response);
+    }
+
+    // Otherwise, return category data wrapped in batch response
     final categoryData = response['product_category'];
-    return categoryData != null
-        ? Category.fromJson(categoryData as Map<String, dynamic>)
-        : null;
+    if (categoryData != null) {
+      final category = AdminProductCategory.fromJson(
+        categoryData as Map<String, dynamic>,
+      );
+      return AdminCategoryProductBatchResponse(
+        productCategory: category,
+        processed: productIds,
+      );
+    }
+
+    return null;
   }
 
   /// Remove products from category
-  Future<Category?> removeProducts(
+  Future<AdminCategoryProductBatchResponse?> removeProducts(
     String id,
     List<String> productIds, {
     ClientHeaders? headers,
   }) async {
-    final body = {'product_ids': productIds};
+    final batch = AdminCategoryProductBatch(productIds: productIds);
 
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/products/batch',
       method: 'DELETE',
-      body: body,
+      body: batch.toJson(),
       headers: headers,
     );
 
+    // If response contains batch information, return batch response
+    if (response.containsKey('processed') || response.containsKey('failed')) {
+      return AdminCategoryProductBatchResponse.fromJson(response);
+    }
+
+    // Otherwise, return category data wrapped in batch response
     final categoryData = response['product_category'];
-    return categoryData != null
-        ? Category.fromJson(categoryData as Map<String, dynamic>)
-        : null;
+    if (categoryData != null) {
+      final category = AdminProductCategory.fromJson(
+        categoryData as Map<String, dynamic>,
+      );
+      return AdminCategoryProductBatchResponse(
+        productCategory: category,
+        processed: productIds,
+      );
+    }
+
+    return null;
   }
 
   /// Get products in category
-  Future<PaginatedResponse<Product>> getProducts(
+  Future<PaginatedResponse<AdminCategoryProduct>> getProducts(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -173,9 +214,13 @@ class AdminCategoryResource extends AdminResource {
       headers: headers,
     );
 
-    final products = (response['products'] as List? ?? [])
-        .map((json) => Product.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final products =
+        (response['products'] as List? ?? [])
+            .map(
+              (json) =>
+                  AdminCategoryProduct.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
 
     return PaginatedResponse(
       data: products,

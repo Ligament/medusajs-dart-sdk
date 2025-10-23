@@ -25,6 +25,9 @@ class MedusaStore {
   /// Region operations - regions, currencies, shipping
   late final region = StoreRegionResource(_client);
 
+  /// Currency operations - configured store currencies
+  late final currency = StoreCurrencyResource(_client);
+
   /// Collection operations - product collections
   late final collection = StoreCollectionResource(_client);
 

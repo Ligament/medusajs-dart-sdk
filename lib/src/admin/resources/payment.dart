@@ -2,130 +2,297 @@ import '../../resources/base_resource.dart';
 import '../../models/models.dart';
 import '../../types/types.dart';
 
-/// Admin payment resource for managing payments
+/// Admin payment resource for payment management and processing
+/// Comprehensive payment operations with capture, refund, and cancellation
 class AdminPaymentResource extends AdminResource {
   const AdminPaymentResource(super.client);
 
   String get resourcePath => '$basePath/payments';
 
-  /// List payments
-  Future<PaginatedResponse<Payment>> list({
+  /// List payments with advanced filtering
+  Future<PaginatedResponse<AdminPayment>> list({
+    AdminPaymentFilters? filters,
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Payment>(
+    final queryParams = <String, dynamic>{};
+
+    // Add filters if provided
+    if (filters != null) {
+      queryParams.addAll(filters.toQueryParameters());
+    }
+
+    // Add additional query parameters
+    if (query != null) {
+      queryParams.addAll(query);
+    }
+
+    return await listGeneric<AdminPayment>(
       endpoint: resourcePath,
       dataKey: 'payments',
-      fromJson: Payment.fromJson,
-      query: query,
+      fromJson: AdminPayment.fromJson,
+      query: queryParams.isNotEmpty ? queryParams : null,
       headers: headers,
     );
   }
 
   /// Retrieve a payment by ID
-  Future<Payment?> retrieve(
+  Future<AdminPayment?> retrieve(
     String id, {
+    List<String>? expand,
+    List<String>? fields,
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Payment>(
+    final queryParams = <String, dynamic>{};
+
+    if (expand != null && expand.isNotEmpty) {
+      queryParams['expand'] = expand.join(',');
+    }
+    if (fields != null && fields.isNotEmpty) {
+      queryParams['fields'] = fields.join(',');
+    }
+    if (query != null) {
+      queryParams.addAll(query);
+    }
+
+    return await retrieveGeneric<AdminPayment>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'payment',
-      fromJson: Payment.fromJson,
-      query: query,
+      fromJson: AdminPayment.fromJson,
+      query: queryParams.isNotEmpty ? queryParams : null,
       headers: headers,
     );
   }
 
   /// Capture a payment
-  Future<Payment?> capture(
+  Future<AdminPayment?> capture(
     String id,
-    Map<String, dynamic> body, {
+    AdminCapturePayment captureRequest, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/capture',
       method: 'POST',
-      body: body,
+      body: captureRequest.toJson(),
       query: query,
       headers: headers,
     );
 
     final paymentData = response['payment'] as Map<String, dynamic>?;
-    return paymentData != null ? Payment.fromJson(paymentData) : null;
+    return paymentData != null ? AdminPayment.fromJson(paymentData) : null;
   }
 
   /// Refund a payment
-  Future<Payment?> refund(
+  Future<AdminRefund?> refund(
     String id,
-    Map<String, dynamic> body, {
+    AdminRefundPayment refundRequest, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/refund',
       method: 'POST',
+      body: refundRequest.toJson(),
+      query: query,
+      headers: headers,
+    );
+
+    final refundData = response['refund'] as Map<String, dynamic>?;
+    return refundData != null ? AdminRefund.fromJson(refundData) : null;
+  }
+
+  /// Cancel a payment
+  Future<AdminPayment?> cancel(
+    String id, {
+    AdminCancelPayment? cancelRequest,
+    Map<String, dynamic>? query,
+    ClientHeaders? headers,
+  }) async {
+    final body = cancelRequest?.toJson() ?? <String, dynamic>{};
+
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/$id/cancel',
+      method: 'POST',
       body: body,
       query: query,
       headers: headers,
     );
 
     final paymentData = response['payment'] as Map<String, dynamic>?;
-    return paymentData != null ? Payment.fromJson(paymentData) : null;
+    return paymentData != null ? AdminPayment.fromJson(paymentData) : null;
   }
 
-  /// Cancel a payment
-  Future<Payment?> cancel(
-    String id, {
+  /// Update a payment
+  Future<AdminPayment?> update(
+    String id,
+    AdminUpdatePayment updateRequest, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    final response = await client.fetch<Map<String, dynamic>>(
-      '$resourcePath/$id/cancel',
-      method: 'POST',
+    return await updateGeneric<AdminPayment>(
+      id: id,
+      endpoint: '$resourcePath/$id',
+      dataKey: 'payment',
+      fromJson: AdminPayment.fromJson,
+      body: updateRequest.toJson(),
       query: query,
       headers: headers,
     );
-
-    final paymentData = response['payment'] as Map<String, dynamic>?;
-    return paymentData != null ? Payment.fromJson(paymentData) : null;
   }
 
+  // ===== Convenience Methods =====
+
   /// Get payments by order
-  Future<PaginatedResponse<Payment>> byOrder(
+  Future<PaginatedResponse<AdminPayment>> byOrder(
     String orderId, {
+    List<String>? expand,
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {
-    final query = Map<String, dynamic>.from(additionalFilters ?? {});
-    query['order_id'] = orderId;
+    final filters = AdminPaymentFilters(orderId: [orderId], expand: expand);
 
-    return list(query: query, headers: headers);
+    return list(filters: filters, query: additionalFilters, headers: headers);
+  }
+
+  /// Get payments by customer
+  Future<PaginatedResponse<AdminPayment>> byCustomer(
+    String customerId, {
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    final filters = AdminPaymentFilters(
+      customerId: [customerId],
+      expand: expand,
+    );
+
+    return list(filters: filters, query: additionalFilters, headers: headers);
   }
 
   /// Get payments by status
-  Future<PaginatedResponse<Payment>> byStatus(
+  Future<PaginatedResponse<AdminPayment>> byStatus(
     String status, {
+    List<String>? expand,
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {
-    final query = Map<String, dynamic>.from(additionalFilters ?? {});
-    query['status'] = status;
+    final filters = AdminPaymentFilters(status: [status], expand: expand);
 
-    return list(query: query, headers: headers);
+    return list(filters: filters, query: additionalFilters, headers: headers);
   }
 
   /// Get payments by provider
-  Future<PaginatedResponse<Payment>> byProvider(
+  Future<PaginatedResponse<AdminPayment>> byProvider(
     String providerId, {
+    List<String>? expand,
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {
-    final query = Map<String, dynamic>.from(additionalFilters ?? {});
-    query['provider_id'] = providerId;
+    final filters = AdminPaymentFilters(
+      providerId: [providerId],
+      expand: expand,
+    );
 
-    return list(query: query, headers: headers);
+    return list(filters: filters, query: additionalFilters, headers: headers);
+  }
+
+  /// Get payments by currency
+  Future<PaginatedResponse<AdminPayment>> byCurrency(
+    String currencyCode, {
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    final filters = AdminPaymentFilters(
+      currencyCode: [currencyCode],
+      expand: expand,
+    );
+
+    return list(filters: filters, query: additionalFilters, headers: headers);
+  }
+
+  /// Search payments
+  Future<PaginatedResponse<AdminPayment>> search(
+    String query, {
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    final filters = AdminPaymentFilters(q: query, expand: expand);
+
+    return list(filters: filters, query: additionalFilters, headers: headers);
+  }
+
+  /// Get authorized payments
+  Future<PaginatedResponse<AdminPayment>> authorized({
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    return byStatus(
+      'authorized',
+      expand: expand,
+      additionalFilters: additionalFilters,
+      headers: headers,
+    );
+  }
+
+  /// Get captured payments
+  Future<PaginatedResponse<AdminPayment>> captured({
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    return byStatus(
+      'captured',
+      expand: expand,
+      additionalFilters: additionalFilters,
+      headers: headers,
+    );
+  }
+
+  /// Get canceled payments
+  Future<PaginatedResponse<AdminPayment>> canceled({
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    return byStatus(
+      'canceled',
+      expand: expand,
+      additionalFilters: additionalFilters,
+      headers: headers,
+    );
+  }
+
+  /// Get pending payments
+  Future<PaginatedResponse<AdminPayment>> pending({
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    return byStatus(
+      'pending',
+      expand: expand,
+      additionalFilters: additionalFilters,
+      headers: headers,
+    );
+  }
+
+  /// Get payments requiring action
+  Future<PaginatedResponse<AdminPayment>> requiresAction({
+    List<String>? expand,
+    Map<String, dynamic>? additionalFilters,
+    ClientHeaders? headers,
+  }) async {
+    return byStatus(
+      'requires_action',
+      expand: expand,
+      additionalFilters: additionalFilters,
+      headers: headers,
+    );
   }
 }

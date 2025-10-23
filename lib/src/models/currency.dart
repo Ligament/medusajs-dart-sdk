@@ -1,23 +1,46 @@
+import 'dart:math' as math;
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'currency.g.dart';
 
-/// Represents a currency in the Medusa system
+/// Store currency model aligned with @medusajs/types v2.10.3
+///
+/// Mirrors `BaseCurrency`/`StoreCurrency` definitions exposed by the
+/// Medusa Store API.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Currency {
-  /// Currency code (ISO 4217)
+  /// ISO 4217 currency code
   final String code;
 
-  /// Currency symbol
+  /// Primary currency symbol (e.g. `$`)
   final String symbol;
 
-  /// Number of decimal places for the currency
-  final int symbolNative;
+  /// Currency symbol in the native locale/language
+  final String symbolNative;
 
-  /// Currency name
+  /// Human readable currency name
   final String name;
 
-  /// Whether tax is included in prices for this currency
+  /// Number of decimal digits supported by this currency
+  final int decimalDigits;
+
+  /// Rounding precision applied to values in this currency
+  final double rounding;
+
+  /// Timestamp for when the currency was created
+  final DateTime? createdAt;
+
+  /// Timestamp for when the currency was last updated
+  final DateTime? updatedAt;
+
+  /// Timestamp for when the currency was soft-deleted (if ever)
+  final DateTime? deletedAt;
+
+  /// Optional metadata returned by certain admin/store endpoints
+  final Map<String, dynamic>? metadata;
+
+  /// Legacy flag kept for backward compatibility with older API payloads
   final bool? includesTax;
 
   const Currency({
@@ -25,6 +48,12 @@ class Currency {
     required this.symbol,
     required this.symbolNative,
     required this.name,
+    required this.decimalDigits,
+    required this.rounding,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+    this.metadata,
     this.includesTax,
   });
 
@@ -33,18 +62,21 @@ class Currency {
   Map<String, dynamic> toJson() => _$CurrencyToJson(this);
 
   /// Format an amount according to this currency
-  String formatAmount(int amount) {
-    final decimal = amount / 100; // Convert from smallest unit
-    return '$symbol${decimal.toStringAsFixed(2)}';
+  String formatAmount(int amountMinorUnits) {
+    final divisor = math.pow(10, decimalDigits).toDouble();
+    final decimal = amountMinorUnits / divisor;
+    return '$symbol${decimal.toStringAsFixed(decimalDigits)}';
   }
 
   /// Convert amount from major units to minor units (e.g., dollars to cents)
-  int toMinorUnits(double amount) {
-    return (amount * 100).round();
+  int toMinorUnits(double amountMajorUnits) {
+    final multiplier = math.pow(10, decimalDigits).toDouble();
+    return (amountMajorUnits * multiplier).round();
   }
 
   /// Convert amount from minor units to major units (e.g., cents to dollars)
-  double toMajorUnits(int amount) {
-    return amount / 100;
+  double toMajorUnits(int amountMinorUnits) {
+    final divisor = math.pow(10, decimalDigits).toDouble();
+    return amountMinorUnits / divisor;
   }
 }

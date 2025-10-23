@@ -62,7 +62,7 @@ class MedusaClient {
         late http.Response response;
 
         // Apply timeout if configured
-        final requestWithTimeout = () async {
+        Future<http.Response> requestWithTimeout() async {
           switch (method.toUpperCase()) {
             case 'GET':
               return await _httpClient.get(uri, headers: requestHeaders);
@@ -89,7 +89,7 @@ class MedusaClient {
             default:
               throw MedusaException('Unsupported HTTP method: $method');
           }
-        };
+        }
 
         if (config.timeout != null) {
           response = await requestWithTimeout().timeout(config.timeout!);
@@ -356,8 +356,56 @@ class MedusaClient {
     _logger?.debug('Response: ${response.statusCode} ${response.reasonPhrase}');
 
     if (response.statusCode >= 400) {
-      final errorMessage =
+      final fallbackErrorMessage =
           'HTTP ${response.statusCode}: ${response.reasonPhrase}';
+
+      Map<String, dynamic>? errorData;
+      List<ValidationErrorDetail>? validationErrors;
+      String? bodyMessage;
+
+      final contentType = response.headers['content-type'] ?? '';
+      if (contentType.contains('application/json') &&
+          response.body.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic>) {
+            errorData = Map<String, dynamic>.from(decoded);
+            final messageValue = decoded['message'];
+            if (messageValue is String && messageValue.isNotEmpty) {
+              bodyMessage = messageValue;
+            }
+
+            final details = decoded['details'];
+            if (details is List) {
+              validationErrors =
+                  details.whereType<Map>().map((detail) {
+                    final detailMap = detail.map(
+                      (key, value) => MapEntry(key.toString(), value),
+                    );
+                    final field =
+                        detailMap['field']?.toString() ??
+                        detailMap['path']?.toString() ??
+                        '';
+                    final message =
+                        detailMap['message']?.toString() ??
+                        detailMap['type']?.toString() ??
+                        fallbackErrorMessage;
+                    final code = detailMap['code']?.toString();
+                    return ValidationErrorDetail(
+                      field: field,
+                      message: message,
+                      code: code,
+                    );
+                  }).toList();
+            }
+          }
+        } catch (error) {
+          _logger?.warn('Failed to parse error response body: $error');
+        }
+      }
+
+      final errorMessage =
+          bodyMessage?.isNotEmpty == true ? bodyMessage! : fallbackErrorMessage;
 
       switch (response.statusCode) {
         case 401:
@@ -367,14 +415,23 @@ class MedusaClient {
         case 404:
           throw NotFoundError(errorMessage);
         case 400:
-          throw ValidationError(errorMessage);
+          throw ValidationError(
+            errorMessage,
+            errors: validationErrors,
+            data: errorData,
+          );
         case >= 500:
-          throw ServerError(errorMessage, statusCode: response.statusCode);
+          throw ServerError(
+            errorMessage,
+            statusCode: response.statusCode,
+            data: errorData,
+          );
         default:
           throw FetchError(
             errorMessage,
             statusCode: response.statusCode,
             statusText: response.reasonPhrase,
+            data: errorData,
           );
       }
     }

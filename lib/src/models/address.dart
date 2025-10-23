@@ -5,7 +5,7 @@ part 'address.g.dart';
 /// Represents an address in the Medusa system
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Address {
-  final String id;
+  final String? id;
   final String? customerId;
   final String? company;
   final String? firstName;
@@ -23,7 +23,7 @@ class Address {
   // deletedAt is not in StoreCartAddress, so remove it
 
   const Address({
-    required this.id,
+    this.id,
     this.customerId,
     this.company,
     this.firstName,

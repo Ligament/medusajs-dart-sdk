@@ -3,63 +3,66 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Store cart resource for cart management operations
+///
+/// Uses Store models from store_commerce.dart
+/// for 100% @medusajs/types v2.10.1 compatibility
 class StoreCartResource extends StoreResource {
   const StoreCartResource(super.client);
 
   String get resourcePath => '$basePath/carts';
 
   /// Create a cart
-  Future<Cart?> create(
+  Future<StoreCart?> create(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Cart>(
+    return await createGeneric<StoreCart>(
       body: body,
       endpoint: resourcePath,
       dataKey: 'cart',
-      fromJson: Cart.fromJson,
+      fromJson: StoreCart.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a cart
-  Future<Cart?> update(
+  Future<StoreCart?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Cart>(
+    return await updateGeneric<StoreCart>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'cart',
-      fromJson: Cart.fromJson,
+      fromJson: StoreCart.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a cart by ID
-  Future<Cart?> retrieve(
+  Future<StoreCart?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Cart>(
+    return await retrieveGeneric<StoreCart>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'cart',
-      fromJson: Cart.fromJson,
+      fromJson: StoreCart.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Add line item to cart
-  Future<Cart?> createLineItem(
+  Future<StoreCart?> createLineItem(
     String cartId,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
@@ -75,12 +78,12 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 
   /// Update line item in cart
-  Future<Cart?> updateLineItem(
+  Future<StoreCart?> updateLineItem(
     String cartId,
     String lineItemId,
     Map<String, dynamic> body, {
@@ -97,7 +100,7 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 
@@ -115,7 +118,7 @@ class StoreCartResource extends StoreResource {
   }
 
   /// Add shipping method to cart
-  Future<Cart?> addShippingMethod(
+  Future<StoreCart?> addShippingMethod(
     String cartId,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
@@ -131,7 +134,7 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 
@@ -150,7 +153,7 @@ class StoreCartResource extends StoreResource {
   }
 
   /// Transfer cart to logged-in customer
-  Future<Cart?> transferCart(
+  Future<StoreCart?> transferCart(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -164,12 +167,12 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 
   /// Apply discount code to cart
-  Future<Cart?> applyDiscount(
+  Future<StoreCart?> applyDiscount(
     String cartId,
     String discountCode, {
     Map<String, dynamic>? query,
@@ -187,12 +190,12 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 
   /// Remove discount from cart
-  Future<Cart?> removeDiscount(
+  Future<StoreCart?> removeDiscount(
     String cartId,
     String discountCode, {
     ClientHeaders? headers,
@@ -205,7 +208,7 @@ class StoreCartResource extends StoreResource {
 
     final cartData = response['cart'];
     return cartData != null
-        ? Cart.fromJson(cartData as Map<String, dynamic>)
+        ? StoreCart.fromJson(cartData as Map<String, dynamic>)
         : null;
   }
 }

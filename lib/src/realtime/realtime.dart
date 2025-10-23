@@ -5,6 +5,7 @@
 /// - Real-time data subscriptions
 /// - Live updates for resources
 /// - Event-driven programming patterns
+library;
 
 import 'dart:async';
 import 'dart:convert';

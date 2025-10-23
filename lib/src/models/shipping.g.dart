@@ -102,7 +102,7 @@ ShippingMethod _$ShippingMethodFromJson(Map<String, dynamic> json) =>
       swapId: json['swap_id'] as String?,
       returnId: json['return_id'] as String?,
       claimId: json['claim_id'] as String?,
-      price: (json['price'] ?? 0).toInt(),
+      price: (json['price'] as num).toInt(),
       data: json['data'] as Map<String, dynamic>?,
       createdAt:
           json['created_at'] == null

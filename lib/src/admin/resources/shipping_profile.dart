@@ -97,21 +97,6 @@ class AdminShippingProfileResource extends AdminResource {
     return list(query: query, headers: headers);
   }
 
-  /// Get products associated with a shipping profile
-  Future<PaginatedResponse<Product>> getProducts(
-    String id, {
-    Map<String, dynamic>? query,
-    ClientHeaders? headers,
-  }) async {
-    return await listGeneric<Product>(
-      endpoint: '$resourcePath/$id/products',
-      dataKey: 'products',
-      fromJson: Product.fromJson,
-      query: query,
-      headers: headers,
-    );
-  }
-
   /// Get shipping options for a shipping profile
   Future<PaginatedResponse<ShippingOption>> getShippingOptions(
     String id, {

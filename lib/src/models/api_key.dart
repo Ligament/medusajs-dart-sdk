@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'common.dart';
 
 part 'api_key.g.dart';
 

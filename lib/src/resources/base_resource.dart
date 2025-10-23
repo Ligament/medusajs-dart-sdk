@@ -60,7 +60,6 @@ abstract class BaseResource {
       query: query,
       headers: headers,
     );
-
     final data = response[dataKey];
     return data != null ? fromJson(data as Map<String, dynamic>) : null;
   }

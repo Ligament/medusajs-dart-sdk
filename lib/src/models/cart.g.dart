@@ -8,7 +8,7 @@ part of 'cart.dart';
 
 Cart _$CartFromJson(Map<String, dynamic> json) => Cart(
   id: json['id'] as String,
-  currencyCode: json['currency_code'] as String,
+  currencyCode: json['currency_code'] as String?,
   originalItemTotal: (json['original_item_total'] as num?)?.toInt(),
   originalItemSubtotal: (json['original_item_subtotal'] as num?)?.toInt(),
   originalItemTaxTotal: (json['original_item_tax_total'] as num?)?.toInt(),

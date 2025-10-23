@@ -30,17 +30,16 @@ class StorePaymentResource extends StoreResource {
   }
 
   /// Initiate payment session for cart
-  Future<Map<String, dynamic>> initiatePaymentSession(
-    Map<String, dynamic> cart,
+  Future<StorePaymentCollection> initiatePaymentSession(
+    StoreCart cart,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    String? paymentCollectionId = cart['payment_collection']?['id'];
-
+    String? paymentCollectionId = cart.paymentCollection?.id;
     // Create payment collection if it doesn't exist
     if (paymentCollectionId == null) {
-      final collectionBody = {'cart_id': cart['id']};
+      final collectionBody = {'cart_id': cart.id};
 
       final collectionResponse = await client.fetch<Map<String, dynamic>>(
         '/store/payment-collections',
@@ -60,7 +59,7 @@ class StorePaymentResource extends StoreResource {
       headers: headers,
     );
 
-    return response;
+    return StorePaymentCollection.fromJson(response['payment_collection']);
   }
 
   /// Update payment session

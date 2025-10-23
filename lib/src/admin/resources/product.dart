@@ -3,70 +3,73 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin product management resource
+///
+/// Uses AdminProduct model from @medusajs/types v2.10.1
+/// for enhanced admin-specific product management capabilities.
 class AdminProductResource extends AdminResource {
   const AdminProductResource(super.client);
 
   String get resourcePath => '$basePath/products';
 
   /// List products
-  Future<PaginatedResponse<Product>> list({
+  Future<PaginatedResponse<AdminProduct>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Product>(
+    return await listGeneric<AdminProduct>(
       endpoint: resourcePath,
       dataKey: 'products',
-      fromJson: Product.fromJson,
+      fromJson: AdminProduct.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a product by ID
-  Future<Product?> retrieve(
+  Future<AdminProduct?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Product>(
+    return await retrieveGeneric<AdminProduct>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'product',
-      fromJson: Product.fromJson,
+      fromJson: AdminProduct.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new product
-  Future<Product?> create(
+  Future<AdminProduct?> create(
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Product>(
+    return await createGeneric<AdminProduct>(
       body: body,
       endpoint: resourcePath,
       dataKey: 'product',
-      fromJson: Product.fromJson,
+      fromJson: AdminProduct.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a product
-  Future<Product?> update(
+  Future<AdminProduct?> update(
     String id,
     Map<String, dynamic> body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Product>(
+    return await updateGeneric<AdminProduct>(
       id: id,
       body: body,
       endpoint: '$resourcePath/$id',
       dataKey: 'product',
-      fromJson: Product.fromJson,
+      fromJson: AdminProduct.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +88,7 @@ class AdminProductResource extends AdminResource {
   }
 
   /// Search products
-  Future<PaginatedResponse<Product>> search(
+  Future<PaginatedResponse<AdminProduct>> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -97,7 +100,7 @@ class AdminProductResource extends AdminResource {
   }
 
   /// Get products by category
-  Future<PaginatedResponse<Product>> byCategory(
+  Future<PaginatedResponse<AdminProduct>> byCategory(
     String categoryId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -109,7 +112,7 @@ class AdminProductResource extends AdminResource {
   }
 
   /// Get products by collection
-  Future<PaginatedResponse<Product>> byCollection(
+  Future<PaginatedResponse<AdminProduct>> byCollection(
     String collectionId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,

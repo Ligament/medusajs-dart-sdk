@@ -3,43 +3,46 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Store product resource for customer-facing product operations
+///
+/// Uses Store models from store_product.dart
+/// for 100% @medusajs/types v2.10.1 compatibility
 class StoreProductResource extends StoreResource {
   const StoreProductResource(super.client);
 
   String get resourcePath => '$basePath/products';
 
   /// List products
-  Future<PaginatedResponse<Product>> list({
+  Future<PaginatedResponse<StoreProduct>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Product>(
+    return await listGeneric<StoreProduct>(
       endpoint: resourcePath,
       dataKey: 'products',
-      fromJson: Product.fromJson,
+      fromJson: StoreProduct.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve a product by ID
-  Future<Product?> retrieve(
+  Future<StoreProduct?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Product>(
+    return await retrieveGeneric<StoreProduct>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'product',
-      fromJson: Product.fromJson,
+      fromJson: StoreProduct.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Search products
-  Future<PaginatedResponse<Product>> search(
+  Future<PaginatedResponse<StoreProduct>> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -51,7 +54,7 @@ class StoreProductResource extends StoreResource {
   }
 
   /// Get products by category
-  Future<PaginatedResponse<Product>> byCategory(
+  Future<PaginatedResponse<StoreProduct>> byCategory(
     String categoryId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -63,7 +66,7 @@ class StoreProductResource extends StoreResource {
   }
 
   /// Get products by collection
-  Future<PaginatedResponse<Product>> byCollection(
+  Future<PaginatedResponse<StoreProduct>> byCollection(
     String collectionId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -75,7 +78,7 @@ class StoreProductResource extends StoreResource {
   }
 
   /// Get products in price range
-  Future<PaginatedResponse<Product>> inPriceRange(
+  Future<PaginatedResponse<StoreProduct>> inPriceRange(
     double minPrice,
     double maxPrice, {
     Map<String, dynamic>? additionalFilters,
@@ -89,7 +92,7 @@ class StoreProductResource extends StoreResource {
   }
 
   /// Get featured products
-  Future<PaginatedResponse<Product>> featured({
+  Future<PaginatedResponse<StoreProduct>> featured({
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
   }) async {

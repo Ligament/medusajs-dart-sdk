@@ -9,64 +9,64 @@ class AdminInventoryItemResource extends AdminResource {
   String get resourcePath => '$basePath/inventory-items';
 
   /// List inventory items
-  Future<PaginatedResponse<InventoryItem>> list({
+  Future<PaginatedResponse<AdminInventoryItem>> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<InventoryItem>(
+    return await listGeneric<AdminInventoryItem>(
       endpoint: resourcePath,
       dataKey: 'inventory_items',
-      fromJson: InventoryItem.fromJson,
+      fromJson: AdminInventoryItem.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Retrieve an inventory item by ID
-  Future<InventoryItem?> retrieve(
+  Future<AdminInventoryItem?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<InventoryItem>(
+    return await retrieveGeneric<AdminInventoryItem>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'inventory_item',
-      fromJson: InventoryItem.fromJson,
+      fromJson: AdminInventoryItem.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create an inventory item
-  Future<InventoryItem?> create(
-    Map<String, dynamic> body, {
+  Future<AdminInventoryItem?> create(
+    AdminCreateInventoryItem body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<InventoryItem>(
+    return await createGeneric<AdminInventoryItem>(
       endpoint: resourcePath,
-      body: body,
+      body: body.toJson(),
       dataKey: 'inventory_item',
-      fromJson: InventoryItem.fromJson,
+      fromJson: AdminInventoryItem.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update an inventory item
-  Future<InventoryItem?> update(
+  Future<AdminInventoryItem?> update(
     String id,
-    Map<String, dynamic> body, {
+    AdminUpdateInventoryItem body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<InventoryItem>(
+    return await updateGeneric<AdminInventoryItem>(
       id: id,
       endpoint: '$resourcePath/$id',
-      body: body,
+      body: body.toJson(),
       dataKey: 'inventory_item',
-      fromJson: InventoryItem.fromJson,
+      fromJson: AdminInventoryItem.fromJson,
       query: query,
       headers: headers,
     );
@@ -85,7 +85,7 @@ class AdminInventoryItemResource extends AdminResource {
   }
 
   /// Get inventory levels for an item
-  Future<PaginatedResponse<Map<String, dynamic>>> getInventoryLevels(
+  Future<PaginatedResponse<AdminInventoryLevel>> getInventoryLevels(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -96,9 +96,13 @@ class AdminInventoryItemResource extends AdminResource {
       headers: headers,
     );
 
-    final levels = (response['inventory_levels'] as List? ?? [])
-        .map((json) => json as Map<String, dynamic>)
-        .toList();
+    final levels =
+        (response['inventory_levels'] as List? ?? [])
+            .map(
+              (json) =>
+                  AdminInventoryLevel.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
 
     return PaginatedResponse(
       data: levels,
@@ -109,40 +113,46 @@ class AdminInventoryItemResource extends AdminResource {
   }
 
   /// Update inventory level at location
-  Future<Map<String, dynamic>> updateInventoryLevel(
+  Future<AdminInventoryLevel?> updateInventoryLevel(
     String id,
     String locationId,
-    Map<String, dynamic> body, {
+    AdminUpdateInventoryLevel body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/location-levels/$locationId',
       method: 'POST',
-      body: body,
+      body: body.toJson(),
       query: query,
       headers: headers,
     );
 
-    return response;
+    final inventoryLevel = response['inventory_level'];
+    return inventoryLevel != null
+        ? AdminInventoryLevel.fromJson(inventoryLevel as Map<String, dynamic>)
+        : null;
   }
 
   /// Create inventory level at location
-  Future<Map<String, dynamic>> createInventoryLevel(
+  Future<AdminInventoryLevel?> createInventoryLevel(
     String id,
-    Map<String, dynamic> body, {
+    AdminCreateInventoryLevel body, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/location-levels',
       method: 'POST',
-      body: body,
+      body: body.toJson(),
       query: query,
       headers: headers,
     );
 
-    return response;
+    final inventoryLevel = response['inventory_level'];
+    return inventoryLevel != null
+        ? AdminInventoryLevel.fromJson(inventoryLevel as Map<String, dynamic>)
+        : null;
   }
 
   /// Delete inventory level at location
@@ -161,7 +171,7 @@ class AdminInventoryItemResource extends AdminResource {
   }
 
   /// Search inventory items by SKU
-  Future<PaginatedResponse<InventoryItem>> bySku(
+  Future<PaginatedResponse<AdminInventoryItem>> bySku(
     String sku, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -173,7 +183,7 @@ class AdminInventoryItemResource extends AdminResource {
   }
 
   /// Get inventory items by location
-  Future<PaginatedResponse<InventoryItem>> byLocation(
+  Future<PaginatedResponse<AdminInventoryItem>> byLocation(
     String locationId, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,

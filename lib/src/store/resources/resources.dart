@@ -2,6 +2,7 @@
 export 'product.dart';
 export 'cart.dart';
 export 'region.dart';
+export 'currency.dart';
 export 'customer.dart';
 export 'order.dart';
 export 'collection.dart';

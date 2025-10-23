@@ -3,7 +3,7 @@ import 'address.dart';
 import 'region.dart';
 import 'line_item.dart';
 import 'shipping.dart';
-import 'store_cart_promotion.dart';
+import 'store_commerce.dart' show StoreCartPromotion;
 
 part 'cart.g.dart';
 
@@ -11,7 +11,7 @@ part 'cart.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class Cart {
   final String id;
-  final String currencyCode;
+  final String? currencyCode;
   final int? originalItemTotal;
   final int? originalItemSubtotal;
   final int? originalItemTaxTotal;
@@ -50,7 +50,7 @@ class Cart {
 
   const Cart({
     required this.id,
-    required this.currencyCode,
+    this.currencyCode,
     this.originalItemTotal,
     this.originalItemSubtotal,
     this.originalItemTaxTotal,

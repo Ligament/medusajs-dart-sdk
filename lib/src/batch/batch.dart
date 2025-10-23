@@ -2,6 +2,7 @@
 ///
 /// Provides utilities for batching multiple API operations together
 /// to reduce the number of HTTP requests and improve performance.
+library;
 
 import 'dart:async';
 import '../types/types.dart';

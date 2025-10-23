@@ -3,89 +3,94 @@ import '../../models/models.dart';
 import '../../types/types.dart';
 
 /// Admin product collection management resource
+///
+/// Manages product collections for organizing and grouping
+/// products with shared characteristics or themes.
 class AdminCollectionResource extends AdminResource {
   const AdminCollectionResource(super.client);
 
   String get resourcePath => '$basePath/collections';
 
   /// List collections
-  Future<PaginatedResponse<Collection>> list({
+  Future<AdminCollectionListResponse> list({
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await listGeneric<Collection>(
-      endpoint: resourcePath,
-      dataKey: 'collections',
-      fromJson: Collection.fromJson,
+    final response = await client.fetch<Map<String, dynamic>>(
+      resourcePath,
       query: query,
       headers: headers,
     );
+
+    return AdminCollectionListResponse.fromJson(response);
   }
 
   /// Retrieve a collection by ID
-  Future<Collection?> retrieve(
+  Future<AdminCollection?> retrieve(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await retrieveGeneric<Collection>(
+    return await retrieveGeneric<AdminCollection>(
       id: id,
       endpoint: '$resourcePath/$id',
       dataKey: 'collection',
-      fromJson: Collection.fromJson,
+      fromJson: AdminCollection.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Create a new collection
-  Future<Collection?> create(
-    Map<String, dynamic> body, {
+  Future<AdminCollection?> create(
+    AdminCreateCollection createData, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await createGeneric<Collection>(
-      body: body,
+    return await createGeneric<AdminCollection>(
+      body: createData.toJson(),
       endpoint: resourcePath,
       dataKey: 'collection',
-      fromJson: Collection.fromJson,
+      fromJson: AdminCollection.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Update a collection
-  Future<Collection?> update(
+  Future<AdminCollection?> update(
     String id,
-    Map<String, dynamic> body, {
+    AdminUpdateCollection updateData, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
   }) async {
-    return await updateGeneric<Collection>(
+    return await updateGeneric<AdminCollection>(
       id: id,
-      body: body,
+      body: updateData.toJson(),
       endpoint: '$resourcePath/$id',
       dataKey: 'collection',
-      fromJson: Collection.fromJson,
+      fromJson: AdminCollection.fromJson,
       query: query,
       headers: headers,
     );
   }
 
   /// Delete a collection
-  Future<Map<String, dynamic>> delete(
+  Future<AdminCollectionDeleteResponse> delete(
     String id, {
     ClientHeaders? headers,
   }) async {
-    return await deleteGeneric(
-      id: id,
-      endpoint: '$resourcePath/$id',
+    final response = await client.fetch<Map<String, dynamic>>(
+      '$resourcePath/$id',
+      method: 'DELETE',
       headers: headers,
     );
+
+    return AdminCollectionDeleteResponse.fromJson(response);
   }
 
   /// Search collections
-  Future<PaginatedResponse<Collection>> search(
+  Future<AdminCollectionSearchResponse> search(
     String searchTerm, {
     Map<String, dynamic>? additionalFilters,
     ClientHeaders? headers,
@@ -93,53 +98,89 @@ class AdminCollectionResource extends AdminResource {
     final query = Map<String, dynamic>.from(additionalFilters ?? {});
     query['q'] = searchTerm;
 
-    return list(query: query, headers: headers);
+    final startTime = DateTime.now();
+    final listResponse = await list(query: query, headers: headers);
+    final executionTime = DateTime.now().difference(startTime).inMilliseconds;
+
+    return AdminCollectionSearchResponse(
+      collections: listResponse.collections,
+      totalCount: listResponse.count,
+      executionTime: executionTime,
+    );
   }
 
   /// Add products to collection
-  Future<Collection?> addProducts(
+  Future<AdminCollectionProductBatchResponse?> addProducts(
     String id,
     List<String> productIds, {
     ClientHeaders? headers,
   }) async {
-    final body = {'product_ids': productIds};
+    final batch = AdminCollectionProductBatch(productIds: productIds);
 
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/products/batch',
       method: 'POST',
-      body: body,
+      body: batch.toJson(),
       headers: headers,
     );
 
+    // If response contains batch information, return batch response
+    if (response.containsKey('processed') || response.containsKey('failed')) {
+      return AdminCollectionProductBatchResponse.fromJson(response);
+    }
+
+    // Otherwise, return collection data wrapped in batch response
     final collectionData = response['collection'];
-    return collectionData != null
-        ? Collection.fromJson(collectionData as Map<String, dynamic>)
-        : null;
+    if (collectionData != null) {
+      final collection = AdminCollection.fromJson(
+        collectionData as Map<String, dynamic>,
+      );
+      return AdminCollectionProductBatchResponse(
+        collection: collection,
+        processed: productIds,
+      );
+    }
+
+    return null;
   }
 
   /// Remove products from collection
-  Future<Collection?> removeProducts(
+  Future<AdminCollectionProductBatchResponse?> removeProducts(
     String id,
     List<String> productIds, {
     ClientHeaders? headers,
   }) async {
-    final body = {'product_ids': productIds};
+    final batch = AdminCollectionProductBatch(productIds: productIds);
 
     final response = await client.fetch<Map<String, dynamic>>(
       '$resourcePath/$id/products/batch',
       method: 'DELETE',
-      body: body,
+      body: batch.toJson(),
       headers: headers,
     );
 
+    // If response contains batch information, return batch response
+    if (response.containsKey('processed') || response.containsKey('failed')) {
+      return AdminCollectionProductBatchResponse.fromJson(response);
+    }
+
+    // Otherwise, return collection data wrapped in batch response
     final collectionData = response['collection'];
-    return collectionData != null
-        ? Collection.fromJson(collectionData as Map<String, dynamic>)
-        : null;
+    if (collectionData != null) {
+      final collection = AdminCollection.fromJson(
+        collectionData as Map<String, dynamic>,
+      );
+      return AdminCollectionProductBatchResponse(
+        collection: collection,
+        processed: productIds,
+      );
+    }
+
+    return null;
   }
 
   /// Get products in collection
-  Future<PaginatedResponse<Product>> getProducts(
+  Future<PaginatedResponse<AdminCollectionProduct>> getProducts(
     String id, {
     Map<String, dynamic>? query,
     ClientHeaders? headers,
@@ -150,9 +191,13 @@ class AdminCollectionResource extends AdminResource {
       headers: headers,
     );
 
-    final products = (response['products'] as List? ?? [])
-        .map((json) => Product.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final products =
+        (response['products'] as List? ?? [])
+            .map(
+              (json) =>
+                  AdminCollectionProduct.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
 
     return PaginatedResponse(
       data: products,
