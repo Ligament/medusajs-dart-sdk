@@ -2,6 +2,16 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'store_customer.g.dart';
 
+// Helper function to convert postal_code (can be int or String) to String
+String? _postalCodeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return value;
+  if (value is int) return value.toString();
+  return value.toString();
+}
+
+dynamic _postalCodeToJson(String? value) => value;
+
 /// StoreCustomer model from official @medusajs/types v2.10.1
 ///
 /// Extends BaseCustomer (omitting created_by) with addresses as StoreCustomerAddress[]
@@ -131,7 +141,8 @@ class StoreCustomerAddress {
   /// The address's province (lower-case ISO 3166-2)
   final String? province;
 
-  /// The address's postal code
+  /// The address's postal code (can be numeric or string in API)
+  @JsonKey(fromJson: _postalCodeFromJson, toJson: _postalCodeToJson)
   final String? postalCode;
 
   /// The address's phone number

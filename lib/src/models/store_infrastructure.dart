@@ -92,7 +92,7 @@ class StoreRegion {
 class StoreRegionCountry {
   /// The country's region ID
   @JsonKey(name: 'region_id')
-  final String regionId;
+  final String? regionId;
 
   /// The country's ISO 2 code (e.g., "us")
   @JsonKey(name: 'iso_2')
@@ -130,7 +130,7 @@ class StoreRegionCountry {
   final String? deletedAt;
 
   const StoreRegionCountry({
-    required this.regionId,
+    this.regionId,
     this.iso2,
     this.iso3,
     this.numCode,

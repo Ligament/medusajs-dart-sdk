@@ -28,6 +28,16 @@ Map<String, dynamic>? _metadataFromJson(dynamic json) {
 
 dynamic _metadataToJson(Map<String, dynamic>? metadata) => metadata;
 
+// Helper function to convert postal_code (can be int or String) to String
+String? _postalCodeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return value;
+  if (value is int) return value.toString();
+  return value.toString();
+}
+
+dynamic _postalCodeToJson(String? value) => value;
+
 // =============================================================================
 // CORE CART MODELS - Store Cart Management System
 // =============================================================================
@@ -194,7 +204,7 @@ class StoreCart {
   final List<Map<String, dynamic>>? creditLines;
 
   /// The promotions applied to the cart
-  final List<StoreCartPromotion> promotions;
+  final List<StoreCartPromotion>? promotions;
 
   const StoreCart({
     required this.id,
@@ -259,7 +269,7 @@ class StoreCart {
 @JsonSerializable(explicitToJson: true)
 class StoreCartLineItem {
   /// The ID of the line item
-  final String? id;
+  final String id;
 
   /// The title of the line item
   final String? title;
@@ -414,7 +424,7 @@ class StoreCartLineItem {
   final List<StoreLineItemAdjustment>? adjustments;
 
   const StoreCartLineItem({
-    this.id,
+    required this.id,
     this.title,
     this.subtitle,
     this.thumbnail,
@@ -474,7 +484,7 @@ class StoreCartLineItem {
 @JsonSerializable(explicitToJson: true)
 class StoreCartAddress {
   /// The ID of the address
-  final String? id;
+  final String id;
 
   /// The customer ID of the address
   @JsonKey(name: 'customer_id')
@@ -512,8 +522,8 @@ class StoreCartAddress {
   /// The lower-case ISO 3166-2 province/state of the address
   final String? province;
 
-  /// The postal code of the address
-  @JsonKey(name: 'postal_code')
+  /// The postal code of the address (can be numeric or string in API)
+  @JsonKey(name: 'postal_code', fromJson: _postalCodeFromJson, toJson: _postalCodeToJson)
   final String? postalCode;
 
   /// Holds custom data in key-value pairs
@@ -529,7 +539,7 @@ class StoreCartAddress {
   final String? updatedAt;
 
   const StoreCartAddress({
-    this.id,
+    required this.id,
     this.customerId,
     this.firstName,
     this.lastName,
@@ -676,6 +686,10 @@ class StoreCartPromotion {
   @JsonKey(name: 'is_automatic')
   final bool? isAutomatic;
 
+  /// Whether the promotion is tax inclusive
+  @JsonKey(name: 'is_tax_inclusive')
+  final bool? isTaxInclusive;
+
   /// How the promotion is applied
   @JsonKey(name: 'application_method')
   final StorePromotionApplicationMethod? applicationMethod;
@@ -685,6 +699,7 @@ class StoreCartPromotion {
     this.code,
     this.isAutomatic,
     this.applicationMethod,
+    this.isTaxInclusive,
   });
 
   factory StoreCartPromotion.fromJson(Map<String, dynamic> json) =>
@@ -692,10 +707,20 @@ class StoreCartPromotion {
   Map<String, dynamic> toJson() => _$StoreCartPromotionToJson(this);
 }
 
+// Helper function to convert value (can be int or String) to String
+String _valueFromJson(dynamic value) {
+  if (value is String) return value;
+  if (value is num) return value.toString();
+  return value.toString();
+}
+
+dynamic _valueToJson(String value) => value;
+
 /// StorePromotionApplicationMethod - How a promotion is applied
 @JsonSerializable()
 class StorePromotionApplicationMethod {
-  /// The amount to be discounted
+  /// The amount to be discounted (can be numeric or string in API)
+  @JsonKey(fromJson: _valueFromJson, toJson: _valueToJson)
   final String value;
 
   /// The application method's type
@@ -1191,8 +1216,8 @@ class StoreOrderAddress {
   /// The province/state
   final String? province;
 
-  /// The postal code
-  @JsonKey(name: 'postal_code')
+  /// The postal code (can be numeric or string in API)
+  @JsonKey(name: 'postal_code', fromJson: _postalCodeFromJson, toJson: _postalCodeToJson)
   final String? postalCode;
 
   /// Holds custom data in key-value pairs
@@ -1649,9 +1674,9 @@ class StoreLineItemAdjustment {
   /// The amount to adjust the original amount with
   final double amount;
 
-  /// The ID of the associated cart
+  /// The ID of the associated cart (nullable in adjustments)
   @JsonKey(name: 'cart_id')
-  final String cartId;
+  final String? cartId;
 
   /// The description of the adjustment line
   final String? description;
@@ -1664,33 +1689,33 @@ class StoreLineItemAdjustment {
   @JsonKey(name: 'provider_id')
   final String? providerId;
 
-  /// When the adjustment line was created
+  /// When the adjustment line was created (nullable in adjustments)
   @JsonKey(name: 'created_at')
-  final String createdAt;
+  final String? createdAt;
 
-  /// When the adjustment line was updated
+  /// When the adjustment line was updated (nullable in adjustments)
   @JsonKey(name: 'updated_at')
-  final String updatedAt;
+  final String? updatedAt;
 
-  /// The associated line item
-  final StoreCartLineItem item;
+  /// The associated line item (nullable in adjustments)
+  final StoreCartLineItem? item;
 
-  /// The ID of the associated line item
+  /// The ID of the associated line item (nullable in adjustments)
   @JsonKey(name: 'item_id')
-  final String itemId;
+  final String? itemId;
 
   const StoreLineItemAdjustment({
     required this.id,
     this.code,
     required this.amount,
-    required this.cartId,
+    this.cartId,
     this.description,
     this.promotionId,
     this.providerId,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.item,
-    required this.itemId,
+    this.createdAt,
+    this.updatedAt,
+    this.item,
+    this.itemId,
   });
 
   factory StoreLineItemAdjustment.fromJson(Map<String, dynamic> json) =>
